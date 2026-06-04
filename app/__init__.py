@@ -20,6 +20,7 @@ def create_app():
     from app.psb import psb_bp
     from app.payjs import payjs_bp
     from app.beta import beta_bp
+    from app.guide import guide_bp
 
     app.register_blueprint(translate_bp)
     app.register_blueprint(auth_bp)
@@ -29,6 +30,7 @@ def create_app():
     app.register_blueprint(psb_bp)
     app.register_blueprint(payjs_bp)
     app.register_blueprint(beta_bp)
+    app.register_blueprint(guide_bp)
 
     @app.route("/")
     def index():
@@ -53,6 +55,12 @@ def create_app():
         from flask import render_template
 
         return render_template("psb_guide.html")
+
+    @app.route("/gmb/guide")
+    def gmb_guide():
+        from flask import render_template
+
+        return render_template("gmb_guide.html")
 
     @app.route("/health")
     def health():

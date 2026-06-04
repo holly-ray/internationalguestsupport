@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TripAdvisor 上架指南 - 国际宾客支持</title>
+<title>Google 商家手动上架指南 - 国际宾客支持</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
 </head>
@@ -15,7 +15,7 @@
       <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">客</div>
       <span class="font-semibold text-gray-900 text-sm">国际宾客支持</span>
     </a>
-    <a href="/console" class="text-sm text-gray-500 hover:text-brand-600">← 返回控制台</a>
+    <a href="/gmb" class="text-sm text-gray-500 hover:text-brand-600">← 返回</a>
   </div>
 </header>
 
@@ -23,13 +23,13 @@
   <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 text-sm text-amber-800 flex items-start gap-3">
     <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
     <div>
-      <p class="font-medium">TripAdvisor 未提供官方 API，本指南帮助您手动完成上架</p>
-      <p class="mt-0.5">以下数据已从你的门店信息自动预填。打勾记录进度，刷新页面后不会丢失。</p>
+      <p class="font-medium">无需任何 API 或 OAuth 授权</p>
+      <p class="mt-0.5">本指南帮助您手动在 Google 搜索和地图上架商家。全程约需 15-20 分钟，无需技术背景。</p>
     </div>
   </div>
 
-  <h1 class="text-2xl font-bold text-gray-900 mb-1">TripAdvisor 商家上架指南</h1>
-  <p class="text-gray-500 text-sm mb-8">5 步将您的餐厅/酒店添加到全球最大的旅游点评平台</p>
+  <h1 class="text-2xl font-bold text-gray-900 mb-1">Google 商家上架指南</h1>
+  <p class="text-gray-500 text-sm mb-8">5 步将您的酒店/餐厅发布到 Google，让外国游客搜到你</p>
 
   <!-- Progress Bar -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-8">
@@ -42,35 +42,19 @@
     </div>
   </div>
 
-  <!-- English Description Generator -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-3">AI 生成英文商家描述</h2>
-    <p class="text-sm text-gray-500 mb-4">基于你的门店信息，自动生成适合 TripAdvisor 的英文描述。可直接复制粘贴到 TripAdvisor 描述栏。</p>
-    <button id="genDescBtn" onclick="generateDescription()" class="px-5 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors disabled:opacity-50">生成英文描述</button>
-    <div id="descResult" class="hidden mt-4">
-      <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs text-gray-500 font-medium">英文描述</span>
-          <button onclick="copyText('descContent')" class="text-xs text-brand-600 hover:text-brand-700">一键复制</button>
-        </div>
-        <p id="descContent" class="text-sm text-gray-800 whitespace-pre-line"></p>
-      </div>
-    </div>
-  </div>
-
   <!-- Step 1 -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
     <div class="flex items-center gap-3 mb-4">
       <span class="w-8 h-8 bg-brand-600 text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0">1</span>
-      <h2 class="text-lg font-semibold text-gray-900">注册 TripAdvisor 业主账号</h2>
+      <h2 class="text-lg font-semibold text-gray-900">注册 Google 账号，进入商家中心</h2>
     </div>
     <div class="mb-4 rounded-lg overflow-hidden border border-gray-200">
-      <img src="/static/images/tripadvisor/step1-register.png" alt="TripAdvisor 注册页面" class="w-full" onerror="this.style.display='none'">
+      <img src="/static/images/gmb/step1-register.svg" alt="Google 商家中心注册" class="w-full" onerror="this.parentElement.style.display='none'">
     </div>
     <ol class="space-y-2 text-sm text-gray-700">
-      <li>1. 访问 <a href="https://www.tripadvisor.com/Owners" target="_blank" rel="noopener" class="text-brand-600 hover:underline">tripadvisor.com/Owners</a>（业主中心）</li>
-      <li>2. 点击 "Register" 或 "注册"，使用邮箱创建业主账号</li>
-      <li>3. 验证邮箱后登录业主中心</li>
+      <li>1. 如果还没有 Gmail 邮箱，先去 <a href="https://mail.google.com" target="_blank" rel="noopener" class="text-brand-600 hover:underline">mail.google.com</a> 免费注册一个</li>
+      <li>2. 访问 <a href="https://business.google.com/add" target="_blank" rel="noopener" class="text-brand-600 hover:underline">business.google.com/add</a>（Google 商家中心）</li>
+      <li>3. 用 Gmail 账号登录，点击"添加商家"</li>
     </ol>
     <div class="mt-4 flex items-center gap-2">
       <input type="checkbox" id="step1Done" onchange="toggleStep(1)" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
@@ -82,19 +66,22 @@
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
     <div class="flex items-center gap-3 mb-4">
       <span class="w-8 h-8 bg-brand-600 text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0">2</span>
-      <h2 class="text-lg font-semibold text-gray-900">添加您的商家</h2>
+      <h2 class="text-lg font-semibold text-gray-900">搜索并认领/添加您的商家</h2>
     </div>
     <div class="mb-4 rounded-lg overflow-hidden border border-gray-200">
-      <img src="/static/images/tripadvisor/step2-search.png" alt="搜索或添加商家" class="w-full" onerror="this.style.display='none'">
+      <img src="/static/images/gmb/step2-search.svg" alt="搜索或添加商家" class="w-full" onerror="this.parentElement.style.display='none'">
     </div>
-    <ol class="space-y-2 text-sm text-gray-700">
-      <li>1. 登录后在业主中心点击 "Add Your Business"</li>
-      <li>2. 用商家名称 + 城市搜索，确认是否已存在页面</li>
-      <li>3. 已存在 → 点击 "Claim"（认领）；不存在 → 点击 "Add a New Listing"</li>
-    </ol>
-    <div id="step2Prefill" class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hidden">
-      <p class="text-xs text-gray-500 mb-1">你的商家名称：</p>
-      <code class="text-sm cursor-pointer select-all" onclick="copyText(this)" id="prefillName">—</code>
+    <div class="space-y-2 text-sm text-gray-700" id="step2Content">
+      <p>Google 会先让你搜索是否已有商家页面：</p>
+      <ol class="space-y-2 ml-4">
+        <li>1. 输入你的商家名称 + 城市，点击搜索</li>
+        <li>2. <strong>如果已存在</strong>：点击"认领"（Claim），按提示验证所有权</li>
+        <li>3. <strong>如果不存在</strong>：点击"创建新商家"，进入填写页面</li>
+      </ol>
+      <div id="step2Prefill" class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hidden">
+        <p class="text-xs text-gray-500 mb-1">你的商家名称（点击复制）：</p>
+        <code class="text-sm cursor-pointer select-all" onclick="copyText(this)" id="prefillName">—</code>
+      </div>
     </div>
     <div class="mt-4 flex items-center gap-2">
       <input type="checkbox" id="step2Done" onchange="toggleStep(2)" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
@@ -109,18 +96,17 @@
       <h2 class="text-lg font-semibold text-gray-900">填写商家信息</h2>
     </div>
     <div class="mb-4 rounded-lg overflow-hidden border border-gray-200">
-      <img src="/static/images/tripadvisor/step3-form.png" alt="填写商家信息表单" class="w-full" onerror="this.style.display='none'">
+      <img src="/static/images/gmb/step3-form.svg" alt="填写商家信息" class="w-full" onerror="this.parentElement.style.display='none'">
     </div>
     <div class="space-y-3 text-sm text-gray-700">
-      <p class="font-medium">预填数据（点击复制）：</p>
-      <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2" id="step3Prefill"></div>
-      <div class="space-y-2">
-        <p class="font-medium mt-3">关键提示：</p>
-        <ul class="space-y-1 ml-4">
-          <li>类别选择最准确的 1-3 个分类</li>
-          <li>描述用英文写（可用上面的 AI 生成工具）</li>
-          <li>设施标签尽可能多选（WiFi/空调/停车等）</li>
-        </ul>
+      <p class="font-medium">以下是从你的门店信息预填的数据，可直接复制粘贴：</p>
+      <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2" id="step3Prefill">
+        <div><span class="text-xs text-gray-500">商家名称：</span><code class="text-sm cursor-pointer select-all" onclick="copyText(this)">—</code></div>
+        <div><span class="text-xs text-gray-500">类别：</span><code class="text-sm cursor-pointer select-all">酒店 / 餐厅（根据实际情况选择）</code></div>
+        <div><span class="text-xs text-gray-500">地址：</span><code class="text-sm cursor-pointer select-all" onclick="copyText(this)">—</code></div>
+        <div><span class="text-xs text-gray-500">电话：</span><code class="text-sm cursor-pointer select-all" onclick="copyText(this)">—</code></div>
+        <div><span class="text-xs text-gray-500">网站（如有）：</span><code class="text-sm cursor-pointer select-all">—</code></div>
+        <div><span class="text-xs text-gray-500">营业时间：</span><code class="text-sm cursor-pointer select-all">建议如实填写，方便游客规划</code></div>
       </div>
     </div>
     <div class="mt-4 flex items-center gap-2">
@@ -136,19 +122,19 @@
       <h2 class="text-lg font-semibold text-gray-900">上传高质量照片</h2>
     </div>
     <div class="mb-4 rounded-lg overflow-hidden border border-gray-200">
-      <img src="/static/images/tripadvisor/step4-photos.png" alt="上传照片界面" class="w-full" onerror="this.style.display='none'">
+      <img src="/static/images/gmb/step4-photos.svg" alt="上传照片" class="w-full" onerror="this.parentElement.style.display='none'">
     </div>
     <div class="space-y-3 text-sm text-gray-700">
-      <p><strong>最少 5 张照片，建议 10-20 张。</strong></p>
+      <p><strong>最少 1 张，建议 5-10 张。</strong>照片越多，顾客信任度越高。</p>
       <p class="font-medium">推荐拍摄清单：</p>
       <ul class="space-y-1 ml-4">
         <li>✓ 门面/外观（帮助游客找到你）</li>
         <li>✓ 内部环境（大厅/用餐区/前台）</li>
         <li>✓ 招牌菜/特色房型（3-5张）</li>
         <li>✓ 菜单/价目表</li>
-        <li>✓ 周边环境（近地铁/景点等）</li>
+        <li>✓ 团队照片（可选，增加亲切感）</li>
       </ul>
-      <p class="text-xs text-gray-400">推荐尺寸：1200×900 像素以上，横版为佳。</p>
+      <p class="text-xs text-gray-400">推荐尺寸：1200×900 像素以上，横版为佳。支持 JPG 和 PNG 格式。</p>
     </div>
     <div class="mt-4 flex items-center gap-2">
       <input type="checkbox" id="step4Done" onchange="toggleStep(4)" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
@@ -160,17 +146,19 @@
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
     <div class="flex items-center gap-3 mb-4">
       <span class="w-8 h-8 bg-brand-600 text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0">5</span>
-      <h2 class="text-lg font-semibold text-gray-900">验证并发布</h2>
+      <h2 class="text-lg font-semibold text-gray-900">验证商家身份</h2>
     </div>
     <div class="mb-4 rounded-lg overflow-hidden border border-gray-200">
-      <img src="/static/images/tripadvisor/step5-verify.png" alt="验证选项" class="w-full" onerror="this.style.display='none'">
+      <img src="/static/images/gmb/step5-verify.svg" alt="验证商家" class="w-full" onerror="this.parentElement.style.display='none'">
     </div>
     <div class="space-y-3 text-sm text-gray-700">
+      <p>提交后，Google 需要验证你确实是该商家的负责人。验证方式：</p>
       <ul class="space-y-2 ml-4">
-        <li><strong>明信片验证</strong>：邮寄验证码到商家地址，约 2-4 周</li>
-        <li><strong>电话验证</strong>：致电商家电话提供验证码</li>
-        <li><strong>即时验证</strong>：如已验证 Google 商家，部分地区支持快速验证</li>
+        <li><strong>明信片验证（最常见）</strong>：Google 邮寄一张带验证码的明信片到商家地址，约需 1-2 周</li>
+        <li><strong>电话验证</strong>：致电商家电话提供验证码（部分商家支持）</li>
+        <li><strong>视频验证</strong>：与 Google 客服视频通话展示门店（较新方式）</li>
       </ul>
+      <p class="text-xs text-gray-400">验证通过后，商家页面将出现在 Google 搜索和地图结果中。审核期间可以继续完善信息。</p>
     </div>
     <div class="mt-4 flex items-center gap-2">
       <input type="checkbox" id="step5Done" onchange="toggleStep(5)" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
@@ -178,20 +166,10 @@
     </div>
   </div>
 
-  <!-- Optimization Tips -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">上架后优化建议</h2>
-    <ul class="space-y-3 text-sm text-gray-700">
-      <li class="flex gap-3"><span class="text-brand-600 font-bold">01</span><div><strong>及时回复点评</strong>：24 小时内回复，回复率影响搜索排名</div></li>
-      <li class="flex gap-3"><span class="text-brand-600 font-bold">02</span><div><strong>更新菜单/房价</strong>：价格变动及时更新</div></li>
-      <li class="flex gap-3"><span class="text-brand-600 font-bold">03</span><div><strong>添加多语言内容</strong>：至少英文描述，日韩游客多的地区加日韩语</div></li>
-      <li class="flex gap-3"><span class="text-brand-600 font-bold">04</span><div><strong>嵌入 TripAdvisor Widget</strong>：将评分徽章放到你的网站</div></li>
-    </ul>
-  </div>
-
+  <!-- CTA -->
   <div class="mt-8 text-center">
-    <a href="https://www.tripadvisor.com/Owners" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors">
-      前往 TripAdvisor 业主中心
+    <a href="https://business.google.com/add" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors">
+      前往 Google 商家中心
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
     </a>
   </div>
@@ -199,13 +177,13 @@
 
 <footer class="border-t border-gray-200 bg-white mt-12">
   <div class="max-w-5xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
-    <p>TripAdvisor 为 TripAdvisor LLC 的注册商标。本指南仅供参考。</p>
+    <p>Google、Google Maps 为 Google LLC 的商标。本指南仅供参考。</p>
   </div>
 </footer>
 
 <script src="/static/app.js"></script>
 <script>
-const FEATURE = "tripadvisor";
+const FEATURE = "gmb";
 let doneSteps = [];
 
 async function loadProgress() {
@@ -247,40 +225,18 @@ function updateProgress() {
 }
 
 function copyText(el) {
-  const text = typeof el === "string" ? document.getElementById(el).textContent : el.textContent;
+  const text = el.textContent;
   navigator.clipboard.writeText(text).then(() => {
-    // brief flash
+    const orig = el.textContent;
+    el.textContent = "✓ 已复制";
+    el.classList.add("text-green-600");
+    setTimeout(() => { el.textContent = orig; el.classList.remove("text-green-600"); }, 2000);
   }).catch(() => {
-    const r = document.createRange();
-    r.selectNode(typeof el === "string" ? document.getElementById(el) : el);
+    const range = document.createRange();
+    range.selectNode(el);
     window.getSelection().removeAllRanges();
-    window.getSelection().addRange(r);
+    window.getSelection().addRange(range);
   });
-}
-
-async function generateDescription() {
-  const btn = document.getElementById("genDescBtn");
-  btn.disabled = true;
-  btn.textContent = "生成中…";
-
-  try {
-    const res = await fetch("/api/translate/generate-description", { method: "POST" });
-    const data = await res.json();
-    if (data.error) {
-      alert(data.error);
-      btn.disabled = false;
-      btn.textContent = "生成英文描述";
-      return;
-    }
-    document.getElementById("descContent").textContent = data.description;
-    document.getElementById("descResult").classList.remove("hidden");
-    btn.textContent = "重新生成";
-    btn.disabled = false;
-  } catch(e) {
-    alert("网络错误，请重试");
-    btn.disabled = false;
-    btn.textContent = "生成英文描述";
-  }
 }
 
 async function loadProfile() {
@@ -288,21 +244,14 @@ async function loadProfile() {
     const res = await fetch("/api/merchant/profile");
     if (!res.ok) return;
     const data = await res.json();
-    const prefill = document.getElementById("step3Prefill");
     if (data.store_name) {
       document.getElementById("prefillName").textContent = data.store_name;
       document.getElementById("step2Prefill").classList.remove("hidden");
+      const codes = document.querySelectorAll("#step3Prefill code");
+      if (codes[0]) codes[0].textContent = data.store_name || "—";
+      if (codes[2]) codes[2].textContent = [data.address, data.city].filter(Boolean).join(" ") || "—";
+      if (codes[3]) codes[3].textContent = data.phone || "—";
     }
-    const fields = [
-      { label: "商家名称", value: data.store_name },
-      { label: "地址", value: [data.address, data.city].filter(Boolean).join(" ") },
-      { label: "电话", value: data.phone },
-      { label: "类别", value: data.category || "餐厅/酒店" },
-    ];
-    prefill.innerHTML = fields.filter(f => f.value).map(f =>
-      `<div><span class="text-xs text-gray-500">${f.label}：</span><code class="text-sm cursor-pointer select-all" onclick="copyText(this)">${f.value.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></div>`
-    ).join("");
-    if (!prefill.innerHTML) prefill.innerHTML = '<p class="text-xs text-gray-400">暂无门店信息，请先在控制台填写</p>';
   } catch(e) {}
 }
 

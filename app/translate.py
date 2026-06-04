@@ -416,3 +416,88 @@ def export_image():
     except Exception as e:
         print(f"Image export error: {e}", file=sys.stderr)
         return jsonify({"error": "Image generation failed"}), 500
+
+
+@translate_bp.route("/api/translate/generate-description", methods=["POST"])
+def generate_description():
+    from flask import session
+    from app.kv_client import redis_get
+    from app.auth import login_required as _login_required
+
+    if "user_id" not in session:
+        return jsonify({"error": "请先登录"}), 401
+
+    user_id = session["user_id"]
+
+    # Load merchant profile
+    raw = redis_get(f"profile:{user_id}")
+    profile = {}
+    if raw:
+        try:
+            profile = json.loads(raw)
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    store_name = profile.get("store_name", "")
+    category = profile.get("category", "")
+    city = profile.get("city", "")
+    desc = profile.get("description", "")
+    address = profile.get("address", "")
+
+    if not store_name:
+        return jsonify({"error": "请先在控制台填写门店信息"}), 400
+
+    prompt = (
+        f"Write a 150-200 word English description for a TripAdvisor listing for a {category or 'restaurant/hotel'} in {city or 'China'}.\n\n"
+        f"Name: {store_name}\n"
+        f"Address: {address}\n"
+        f"Chinese description: {desc}\n\n"
+        "Rules:\n"
+        "- Warm, inviting American English\n"
+        "- Short paragraphs, easy to read\n"
+        "- Highlight what makes it special\n"
+        "- Include a sentence about location if relevant\n"
+        "- No markdown, no bullet points — just a clean description\n"
+        "- Output ONLY the description, nothing else"
+    )
+
+    api_key = os.getenv("DEEPSEEK_API_KEY", "").strip()
+    if not api_key:
+        return jsonify({"error": "API key not configured"}), 500
+
+    try:
+        req_body = json.dumps({
+            "model": "deepseek-chat",
+            "messages": [
+                {"role": "system", "content": "You are a travel copywriter for TripAdvisor."},
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": 0.7,
+            "max_tokens": 600,
+        }).encode("utf-8")
+
+        req = Request(
+            "https://api.deepseek.com/v1/chat/completions",
+            data=req_body,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}",
+            },
+        )
+        with urlopen(req, timeout=30) as r:
+            body = json.loads(r.read().decode("utf-8"))
+        return jsonify({"description": body["choices"][0]["message"]["content"]})
+    except URLError as e:
+        try:
+            from app.beta import log_error_to_kv
+            log_error_to_kv("translate", "Description gen URLError", str(e.reason))
+        except Exception:
+            pass
+        return jsonify({"error": f"生成失败：{str(e.reason)}"}), 500
+    except Exception as e:
+        try:
+            from app.beta import log_error_to_kv
+            log_error_to_kv("translate", "Description gen exception", str(e))
+        except Exception:
+            pass
+        return jsonify({"error": f"生成失败：{str(e)}"}), 500
