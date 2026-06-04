@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商户控制台 - 国际宾客支持</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
+<script src="/static/app.js"></script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<!-- Mobile hamburger -->
+<div class="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 px-4 h-14 flex items-center justify-between">
+  <button onclick="toggleSidebar()" class="p-2 text-gray-600 hover:text-gray-900">
+    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <span class="font-semibold text-gray-900 text-sm">国际宾客支持</span>
+  <span id="mobileUser" class="text-xs text-gray-500"></span>
+</div>
+
+<!-- Sidebar overlay (mobile) -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed top-0 left-0 z-50 w-60 h-full bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 flex flex-col">
+  <div class="h-14 flex items-center gap-2 px-4 border-b border-gray-200 shrink-0">
+    <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">客</div>
+    <span class="font-semibold text-gray-900 text-sm">国际宾客支持</span>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1" id="sidebarNav">
+    <p class="px-3 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">物料工具</p>
+    <a href="/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+      物料翻译
+    </a>
+    <a href="#" onclick="showPanel('history')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors" data-panel="history">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      翻译记录
+    </a>
+
+    <p class="px-3 mt-6 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">门店管理</p>
+    <a href="#" onclick="showPanel('profile')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-brand-700 bg-brand-50 transition-colors" data-panel="profile" id="nav-profile">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+      门店信息
+    </a>
+    <a href="#" onclick="showPanel('stats')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors" data-panel="stats">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      使用统计
+    </a>
+
+    <p class="px-3 mt-6 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">外宾工具</p>
+    <a href="/gmb" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+      Google 商家
+    </a>
+    <a href="/tripadvisor" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+      TripAdvisor
+    </a>
+
+    <p class="px-3 mt-6 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">外宾合规</p>
+    <a href="/psb" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      登记培训
+    </a>
+    <a href="/psb/mrz" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+      MRZ 识别
+    </a>
+    <a href="/psb/contacts" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+      机构查询
+    </a>
+
+    <p class="px-3 mt-6 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">支付中心</p>
+    <a href="/payment/diagnosis" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      支付诊断
+    </a>
+    <a href="/payment/tutorials" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      接入教程
+    </a>
+
+    <p class="px-3 mt-6 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">账户</p>
+    <a href="#" onclick="showPanel('subscription')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors" data-panel="subscription">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+      订阅状态
+    </a>
+    <a href="/subscription" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      升级套餐
+    </a>
+    <a href="/beta/feedback" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+      意见反馈
+    </a>
+  </nav>
+
+  <div class="border-t border-gray-200 p-4 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center text-brand-700 text-xs font-bold" id="userAvatar">--</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-gray-900 truncate" id="sidebarPhone">---</p>
+        <p class="text-xs text-gray-500" id="sidebarUsage"></p>
+      </div>
+    </div>
+    <a href="/logout" class="mt-3 block text-center text-xs text-gray-400 hover:text-red-500 transition-colors">退出登录</a>
+  </div>
+</aside>
+
+<!-- Main content -->
+<main class="lg:ml-60 pt-14 lg:pt-0 min-h-screen">
+  <!-- Top bar (desktop) -->
+  <header class="hidden lg:flex h-14 border-b border-gray-200 bg-white items-center justify-between px-6 sticky top-0 z-30">
+    <h1 class="text-sm font-semibold text-gray-900" id="pageTitle">门店信息</h1>
+    <span class="text-xs text-gray-500" id="headerPhone"></span>
+  </header>
+
+  <div class="max-w-4xl mx-auto px-4 py-6 lg:py-8">
+    <!-- Message box -->
+    <div id="msgBox" class="hidden mb-6 p-4 rounded-xl text-sm"></div>
+
+    <!-- ===== PROFILE PANEL ===== -->
+    <div id="panel-profile" class="panel-content">
+      <h2 class="text-xl font-bold text-gray-900 mb-6">门店信息</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <form id="profileForm" onsubmit="saveProfile(event)" class="space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">门店名称 <span class="text-red-500">*</span></label>
+              <input type="text" id="pf_store_name" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="如：老张川菜馆">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">商户类别</label>
+              <select id="pf_category" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white">
+                <option value="">请选择</option>
+                <option value="restaurant">餐饮/餐厅</option>
+                <option value="hotel">酒店/民宿</option>
+                <option value="retail">零售/商店</option>
+                <option value="other">其他服务</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+              <input type="tel" id="pf_phone" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="如：138-0000-1234">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">所在城市</label>
+              <input type="text" id="pf_city" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="如：北京市">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">详细地址</label>
+            <input type="text" id="pf_address" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="如：朝阳区建国路88号">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">门店简介</label>
+            <textarea id="pf_description" rows="3" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-y" placeholder="简单介绍您的门店特色……"></textarea>
+          </div>
+          <button type="submit" class="px-6 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">保存信息</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== HISTORY PANEL ===== -->
+    <div id="panel-history" class="panel-content hidden">
+      <h2 class="text-xl font-bold text-gray-900 mb-6">翻译记录</h2>
+      <div id="historyList"></div>
+      <p id="historyEmpty" class="text-center text-gray-400 text-sm py-12 hidden">暂无翻译记录。<a href="/dashboard" class="text-brand-600 hover:underline">开始翻译</a></p>
+    </div>
+
+    <!-- ===== STATS PANEL ===== -->
+    <div id="panel-stats" class="panel-content hidden">
+      <h2 class="text-xl font-bold text-gray-900 mb-6">使用统计</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <p class="text-sm text-gray-500 mb-1">今日翻译</p>
+          <p class="text-3xl font-bold text-gray-900" id="statToday">-</p>
+          <p class="text-xs text-gray-400 mt-1">每日限额 <span id="statLimit">20</span> 次</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <p class="text-sm text-gray-500 mb-1">累计翻译</p>
+          <p class="text-3xl font-bold text-gray-900" id="statTotal">-</p>
+          <p class="text-xs text-gray-400 mt-1">全部历史</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <p class="text-sm text-gray-500 mb-1">当前套餐</p>
+          <p class="text-3xl font-bold text-brand-600" id="statPlan">免费版</p>
+          <p class="text-xs text-gray-400 mt-1">4 语种支持</p>
+        </div>
+      </div>
+      <!-- Usage bar -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-gray-600">今日用量</span>
+          <span class="text-gray-900 font-semibold"><span id="barUsed">0</span> / <span id="barLimit">20</span> 次</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+          <div id="usageBar" class="bg-brand-600 h-3 rounded-full transition-all duration-500" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SUBSCRIPTION PANEL ===== -->
+    <div id="panel-subscription" class="panel-content hidden">
+      <h2 class="text-xl font-bold text-gray-900 mb-6">订阅状态</h2>
+      <div id="subContent"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+let currentPanel = "profile";
+
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("sidebarOverlay");
+  const open = sidebar.classList.contains("-translate-x-full");
+  sidebar.classList.toggle("-translate-x-full", !open);
+  sidebar.classList.toggle("translate-x-0", open);
+  overlay.classList.toggle("hidden", !open);
+}
+
+function showPanel(name) {
+  currentPanel = name;
+  // Hide all panels
+  document.querySelectorAll(".panel-content").forEach(el => el.classList.add("hidden"));
+  // Show target
+  const panel = document.getElementById("panel-" + name);
+  if (panel) panel.classList.remove("hidden");
+  // Update nav active state
+  document.querySelectorAll("[data-panel]").forEach(el => {
+    el.classList.remove("font-medium", "text-brand-700", "bg-brand-50");
+    el.classList.add("text-gray-700");
+  });
+  const navItem = document.querySelector(`[data-panel="${name}"]`);
+  if (navItem) {
+    navItem.classList.add("font-medium", "text-brand-700", "bg-brand-50");
+    navItem.classList.remove("text-gray-700");
+  }
+  // Update page title
+  const titles = {
+    profile: "门店信息", history: "翻译记录", stats: "使用统计", subscription: "订阅状态"
+  };
+  document.getElementById("pageTitle").textContent = titles[name] || "";
+  // Close mobile sidebar
+  if (window.innerWidth < 1024) toggleSidebar();
+  // Load data
+  if (name === "history") loadHistory();
+  if (name === "stats") loadStats();
+  if (name === "subscription") loadSubscription();
+}
+
+// ===== Profile =====
+async function loadProfile() {
+  try {
+    const res = await fetch("/api/merchant/profile");
+    if (res.status === 401) { if (!_authRedirecting) { _authRedirecting = true; window.location.href = "/login"; } return; }
+    const data = await res.json();
+    if (data && data.store_name) {
+      document.getElementById("pf_store_name").value = data.store_name || "";
+      document.getElementById("pf_category").value = data.category || "";
+      document.getElementById("pf_phone").value = data.phone || "";
+      document.getElementById("pf_city").value = data.city || "";
+      document.getElementById("pf_address").value = data.address || "";
+      document.getElementById("pf_description").value = data.description || "";
+    }
+  } catch(e) {}
+}
+
+async function saveProfile(e) {
+  e.preventDefault();
+  const data = {
+    store_name: document.getElementById("pf_store_name").value.trim(),
+    category: document.getElementById("pf_category").value,
+    phone: document.getElementById("pf_phone").value.trim(),
+    city: document.getElementById("pf_city").value.trim(),
+    address: document.getElementById("pf_address").value.trim(),
+    description: document.getElementById("pf_description").value.trim(),
+  };
+  if (!data.store_name) { msg("error", "请填写门店名称"); return; }
+  try {
+    const res = await fetch("/api/merchant/profile", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(data)
+    });
+    if (res.status === 401) { if (!_authRedirecting) { _authRedirecting = true; window.location.href = "/login"; } return; }
+    if (res.ok) {
+      msg("success", "门店信息已保存");
+    } else {
+      const d = await res.json();
+      msg("error", d.error || "保存失败");
+    }
+  } catch(e) {
+    msg("error", "网络错误");
+  }
+}
+
+// ===== History =====
+async function loadHistory() {
+  try {
+    const res = await fetch("/api/merchant/history");
+    if (res.status === 401) { if (!_authRedirecting) { _authRedirecting = true; window.location.href = "/login"; } return; }
+    const data = await res.json();
+    const list = document.getElementById("historyList");
+    const empty = document.getElementById("historyEmpty");
+    if (!data || data.length === 0) {
+      list.innerHTML = "";
+      empty.classList.remove("hidden");
+      return;
+    }
+    empty.classList.add("hidden");
+    const TYPE_LABELS = {menu:"菜单/菜品",checkin_guide:"入住指南",room_card:"房型介绍",reg_card:"登记提示卡",emergency_card:"紧急联系卡"};
+    const LANG_FLAGS = {en:"🇬🇧",ja:"🇯🇵",ko:"🇰🇷",ru:"🇷🇺"};
+    list.innerHTML = data.slice().reverse().map(r => `
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-medium text-brand-700">${TYPE_LABELS[r.material_type] || r.material_type} → ${LANG_FLAGS[r.target_lang] || ""} ${r.target_lang.toUpperCase()}</span>
+          <span class="text-xs text-gray-400">${new Date(r.timestamp).toLocaleString("zh-CN")}</span>
+        </div>
+        <div class="text-xs text-gray-500">
+          <p class="text-gray-400 mb-1">原文：${escapeHtml(r.source_preview)}${r.source_preview && r.source_preview.length >= 80 ? "…" : ""}</p>
+          <p>译文：${escapeHtml(r.translated_preview)}${r.translated_preview && r.translated_preview.length >= 80 ? "…" : ""}</p>
+        </div>
+      </div>
+    `).join("");
+  } catch(e) {}
+}
+
+// ===== Stats =====
+async function loadStats() {
+  try {
+    const res = await fetch("/api/merchant/stats");
+    if (res.status === 401) { if (!_authRedirecting) { _authRedirecting = true; window.location.href = "/login"; } return; }
+    const data = await res.json();
+    document.getElementById("statToday").textContent = data.today;
+    document.getElementById("statTotal").textContent = data.total_all_time;
+    document.getElementById("statLimit").textContent = data.limit;
+    document.getElementById("barUsed").textContent = data.today;
+    document.getElementById("barLimit").textContent = data.limit;
+    const pct = data.limit > 0 ? Math.min(100, (data.today / data.limit) * 100) : 0;
+    document.getElementById("usageBar").style.width = pct + "%";
+    if (pct > 80) document.getElementById("usageBar").classList.replace("bg-brand-600", "bg-red-500");
+    else document.getElementById("usageBar").classList.replace("bg-red-500", "bg-brand-600");
+  } catch(e) {}
+}
+
+// ===== Subscription =====
+async function loadSubscription() {
+  try {
+    const res = await fetch("/api/merchant/subscription");
+    if (res.status === 401) { if (!_authRedirecting) { _authRedirecting = true; window.location.href = "/login"; } return; }
+    const data = await res.json();
+    document.getElementById("subContent").innerHTML = `
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-bold text-gray-900">${data.name}</h3>
+            <p class="text-sm text-gray-500">${data.expires_at ? "有效期至 " + new Date(data.expires_at).toLocaleDateString("zh-CN") : "长期有效"}</p>
+          </div>
+          <span class="px-3 py-1 bg-brand-50 text-brand-700 rounded-full text-xs font-medium">当前套餐</span>
+        </div>
+        <div class="border-t border-gray-100 pt-4">
+          <p class="text-sm font-medium text-gray-700 mb-2">包含功能：</p>
+          <ul class="space-y-2">
+            ${(data.features || []).map(f => `
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                ${f}
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+        <div class="border-t border-gray-100 pt-4 mt-4">
+          <a href="/subscription" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">
+            升级套餐
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+          </a>
+        </div>
+      </div>
+    `;
+  } catch(e) {}
+}
+
+// ===== Auth =====
+async function checkAuth() {
+  try {
+    const res = await fetch("/api/auth/me");
+    const data = await res.json();
+    if (!data.authenticated) {
+      if (!_authRedirecting) { _authRedirecting = true; window.location.href = "/login"; }
+      return;
+    }
+    const phone = data.phone || "---";
+    document.getElementById("sidebarPhone").textContent = phone;
+    document.getElementById("headerPhone").textContent = phone;
+    document.getElementById("mobileUser").textContent = phone;
+    document.getElementById("userAvatar").textContent = phone.slice(-2);
+    const usage = data.usage ? data.usage.today + "/" + data.usage.limit : "—";
+    document.getElementById("sidebarUsage").textContent = "今日 " + usage;
+  } catch(e) {}
+}
+
+// Init
+checkAuth();
+loadProfile();
+</script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>支付接入教程 - 国际宾客支持</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+  <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+    <a href="/console" class="flex items-center gap-2 hover:opacity-80">
+      <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">客</div>
+      <span class="font-semibold text-gray-900 text-sm">国际宾客支持</span>
+    </a>
+    <a href="/console" class="text-sm text-gray-500 hover:text-brand-600">← 返回控制台</a>
+  </div>
+</header>
+
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold text-gray-900 mb-1">支付接入教程库</h1>
+  <p class="text-gray-500 text-sm mb-2">三种主流境外收款方案，手把手教您开通</p>
+  <p class="text-xs text-gray-400 mb-8">不确定哪个适合您？先用 <a href="/payment/diagnosis" class="text-brand-600 hover:underline">支付诊断工具</a> 获取推荐。</p>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {% for t in tutorials %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col hover:shadow-md transition-shadow">
+      <div class="w-12 h-12 bg-brand-50 rounded-xl flex items-center justify-center mb-4">
+        {% if t.icon == "credit-card" %}
+        <svg class="w-6 h-6 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+        {% elif t.icon == "smartphone" %}
+        <svg class="w-6 h-6 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        {% else %}
+        <svg class="w-6 h-6 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        {% endif %}
+      </div>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ t.title }}</h3>
+      <p class="text-xs text-gray-500 mb-4 flex-1">{{ t.intro }}</p>
+      <div class="flex items-center justify-between mb-4">
+        <span class="px-2 py-0.5 bg-brand-50 text-brand-700 rounded-full text-xs font-medium">难度：{{ t.difficulty }}</span>
+        <span class="text-xs text-gray-400">⏱ {{ t.time }}</span>
+      </div>
+      <a href="/payment/tutorial/{{ t.slug }}" class="block text-center py-2.5 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">
+        开始学习
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-12 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-2">还不确定选哪个？</h2>
+    <p class="text-sm text-gray-500 mb-4">用我们的诊断工具，6 道题帮您找到最合适的方案。</p>
+    <a href="/payment/diagnosis" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">
+      开始诊断
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</div>
+
+<footer class="border-t border-gray-200 bg-white mt-12">
+  <div class="max-w-5xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+    <p>教程内容基于各平台官方文档整理，具体费率以平台官网为准。</p>
+  </div>
+</footer>
+</body>
+</html>

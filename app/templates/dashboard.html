@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多语种物料生成 - 国际宾客支持</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<!-- Top nav -->
+<header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2 hover:opacity-80">
+      <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">客</div>
+      <span class="font-semibold text-gray-900 text-sm">国际宾客支持</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <span id="userInfo" class="text-xs text-gray-500 hidden"></span>
+      <a href="/logout" id="logoutLink" class="text-xs text-gray-400 hover:text-red-500 hidden">退出</a>
+      <span class="text-xs text-gray-500">多语种物料生成</span>
+    </div>
+  </div>
+</header>
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <!-- Error / Result messages -->
+  <div id="msgBox" class="hidden mb-6 p-4 rounded-xl text-sm"></div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Left: Input -->
+    <div class="space-y-4">
+      <!-- Material type -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <label class="block text-sm font-medium text-gray-700 mb-3">物料类型</label>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="typeBtns"></div>
+      </div>
+
+      <!-- Input text -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <label class="block text-sm font-medium text-gray-700 mb-2">中文内容</label>
+        <textarea id="sourceText" class="w-full min-h-[280px] p-3 border border-gray-300 rounded-lg text-sm font-mono resize-y focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="在此输入中文内容……"></textarea>
+        <div class="mt-2 flex justify-between items-center text-xs text-gray-400">
+          <span id="charCount">0 字</span>
+          <button onclick="resetSample()" class="text-brand-600 hover:underline">恢复示例文本</button>
+        </div>
+      </div>
+
+      <!-- Languages + Translate btn -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <label class="block text-sm font-medium text-gray-700 mb-3">目标语言</label>
+        <div class="flex flex-wrap gap-2" id="langBtns"></div>
+        <button id="translateBtn" onclick="doTranslate()" class="w-full mt-4 py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 disabled:opacity-50 flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+          开始翻译
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Results -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between" id="resultHeader" style="display:none">
+        <h2 class="text-lg font-semibold text-gray-900">翻译结果</h2>
+        <div class="flex gap-2">
+          <button onclick="exportImages()" id="imgBtn" class="text-sm py-2 px-4 border border-gray-300 rounded-lg hover:border-brand-400 flex items-center gap-1.5" disabled>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            导出图片
+          </button>
+          <button onclick="exportPdf()" id="pdfBtn" class="text-sm py-2 px-4 border border-gray-300 rounded-lg hover:border-brand-400 flex items-center gap-1.5" disabled>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            导出PDF
+          </button>
+        </div>
+      </div>
+      <div id="results"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="border-t border-gray-200 bg-white mt-12">
+  <div class="max-w-7xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+    <p>AI翻译结果建议人工复核</p>
+  </div>
+</footer>
+
+<!-- Preview Modal -->
+<div id="previewModal" class="fixed inset-0 z-50 hidden bg-black/50 flex items-center justify-center p-4" onclick="if(event.target===this)closePreview()">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">卡片预览</h3>
+        <button onclick="closePreview()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+      </div>
+      <div id="previewCardContent"></div>
+      <div class="mt-4 flex gap-2 justify-end">
+        <button onclick="closePreview()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">关闭</button>
+        <button onclick="exportSingleImage()" class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700">导出此卡片</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TYPES = [
+  {id:"menu",label:"菜单/菜品",sample:"招牌菜：\n1. 宫保鸡丁 - 花生、鸡丁、干辣椒爆炒\n2. 麻婆豆腐 - 嫩豆腐、牛肉末、花椒\n3. 回锅肉 - 五花肉、蒜苗、豆瓣酱\n4. 水煮鱼 - 草鱼片、豆芽、麻辣汤底\n5. 蛋炒饭 - 鸡蛋、青豆、火腿丁\n\n主食：\n6. 白米饭\n7. 炒面\n8. 红油抄手\n\n饮品：\n9. 酸梅汤\n10. 豆浆（甜/咸）\n11. 青岛啤酒"},
+  {id:"checkin_guide",label:"入住指南",sample:"欢迎来到我们的民宿！\n\n入住信息：\n- 入住时间：下午2:00起\n- 退房时间：中午12:00前\n- 前台电话：138-0000-1234\n- WiFi名称：OurGuest\n- WiFi密码：welcome2024\n\n早餐时间：每天早上7:00-9:30\n\n房间设施：\n- 空调遥控器在床头柜\n- 热水器开关在卫生间门旁\n- 吹风机在洗手台下方抽屉\n\n周边推荐：\n- 步行5分钟到地铁站\n- 步行10分钟到美食街\n- 打车15分钟到景区入口"},
+  {id:"room_card",label:"房型介绍",sample:"房型：豪华大床房\n面积：35平方米\n床型：1.8米×2米大床\n景观：城市全景落地窗\n\n设施清单：\n✓ 独立卫浴（24小时热水）\n✓ 中央空调\n✓ 免费WiFi\n✓ 55寸智能电视\n✓ 迷你吧（免费矿泉水2瓶）\n✓ 保险箱\n✓ 电热水壶+茶包\n✓ 拖鞋+浴袍"},
+  {id:"reg_card",label:"登记提示卡",sample:"欢迎入住！请出示护照办理登记。\n\n入住时间：下午2:00\n退房时间：中午12:00\n\n感谢您的配合！"},
+  {id:"emergency_card",label:"紧急联系卡",sample:"紧急联系卡\n\n前台电话：138-0000-1234\n民宿地址：XX市XX区XX路XX号\n\n报警：110\n急救：120\n火警：119"}
+];
+
+const LANGS = [
+  {code:"en",label:"English",flag:"🇬🇧"},
+  {code:"ja",label:"日本語",flag:"🇯🇵"},
+  {code:"ko",label:"한국어",flag:"🇰🇷"},
+  {code:"ru",label:"Русский",flag:"🇷🇺"}
+];
+
+let currentType = "menu";
+let selectedLangs = ["en","ja","ko"];
+let results = [];
+let editStates = {};
+let currentPreviewIdx = -1;
+
+// Material type → icon mapping for preview
+const TYPE_ICONS = {menu:"utensils",checkin_guide:"home",room_card:"door-open",reg_card:"id-card",emergency_card:"phone"};
+
+// Init UI
+function init() {
+  let h = "";
+  TYPES.forEach(t => {
+    h += `<button onclick="switchType('${t.id}')" class="text-sm px-4 py-2.5 rounded-lg border font-medium transition-all text-left ${t.id===currentType?'bg-brand-600 text-white border-brand-600':'bg-white text-gray-700 border-gray-300 hover:border-brand-400'}" id="type-${t.id}">${t.label}</button>`;
+  });
+  document.getElementById("typeBtns").innerHTML = h;
+
+  h = "";
+  LANGS.forEach(l => {
+    const sel = selectedLangs.includes(l.code);
+    h += `<button onclick="toggleLang('${l.code}')" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all ${sel?'bg-brand-600 text-white border-brand-600':'bg-white text-gray-700 border-gray-300 hover:border-brand-400'}" id="lang-${l.code}"><span>${l.flag}</span><span>${l.label}</span></button>`;
+  });
+  document.getElementById("langBtns").innerHTML = h;
+
+  switchType("menu");
+  checkAuth();
+}
+init();
+
+function switchType(id) {
+  currentType = id;
+  document.querySelectorAll("[id^='type-']").forEach(b => {
+    b.className = b.id === `type-${id}` ? "text-sm px-4 py-2.5 rounded-lg border font-medium transition-all text-left bg-brand-600 text-white border-brand-600" : "text-sm px-4 py-2.5 rounded-lg border font-medium transition-all text-left bg-white text-gray-700 border-gray-300 hover:border-brand-400";
+  });
+  document.getElementById("sourceText").value = TYPES.find(t=>t.id===id).sample;
+  document.getElementById("charCount").textContent = document.getElementById("sourceText").value.length + " 字";
+  results = [];
+  editStates = {};
+  renderResults();
+}
+
+function toggleLang(code) {
+  if (selectedLangs.includes(code)) {
+    selectedLangs = selectedLangs.filter(l => l !== code);
+  } else {
+    selectedLangs.push(code);
+  }
+  let h = "";
+  LANGS.forEach(l => {
+    const sel = selectedLangs.includes(l.code);
+    h += `<button onclick="toggleLang('${l.code}')" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all ${sel?'bg-brand-600 text-white border-brand-600':'bg-white text-gray-700 border-gray-300 hover:border-brand-400'}" id="lang-${l.code}"><span>${l.flag}</span><span>${l.label}</span></button>`;
+  });
+  document.getElementById("langBtns").innerHTML = h;
+}
+
+function resetSample() {
+  document.getElementById("sourceText").value = TYPES.find(t=>t.id===currentType).sample;
+  document.getElementById("charCount").textContent = document.getElementById("sourceText").value.length + " 字";
+  results = [];
+  editStates = {};
+  renderResults();
+}
+
+document.getElementById("sourceText").addEventListener("input", function() {
+  document.getElementById("charCount").textContent = this.value.length + " 字";
+});
+
+function msg(type, text) {
+  const box = document.getElementById("msgBox");
+  box.className = "mb-6 p-4 rounded-xl text-sm " + (type==="error"?"bg-red-50 border border-red-200 text-red-800":"bg-amber-50 border border-amber-200 text-amber-800");
+  box.textContent = text;
+  box.style.display = "block";
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ---- Feature 2: Per-result actions ----
+
+function editResult(idx) {
+  editStates[idx] = !editStates[idx];
+  renderResults();
+}
+
+function saveEdit(idx) {
+  const ta = document.getElementById("edit-ta-" + idx);
+  if (ta) {
+    results[idx].text = ta.value;
+    results[idx].edited = true;
+  }
+  editStates[idx] = false;
+  renderResults();
+}
+
+async function regenerateLang(idx) {
+  const text = document.getElementById("sourceText").value.trim();
+  if (!text) return;
+
+  const lang = results[idx].lang;
+  results[idx].loading = true;
+  renderResults();
+
+  try {
+    const res = await fetch("/api/translate", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({sourceText:text, materialType:currentType, targetLang:lang})
+    });
+    const data = await res.json();
+    if (data.error) {
+      if (res.status === 401) { window.location.href = "/login"; return; }
+      if (res.status === 429) { msg("error", data.error); results[idx].loading = false; renderResults(); return; }
+    }
+    results[idx] = {lang, text: data.translatedText || data.error || "翻译失败", loading:false, edited: false};
+  } catch(e) {
+    msg("error","网络错误，请检查连接后重试");
+    results[idx].loading = false;
+  }
+  renderResults();
+}
+
+function copyText(idx) {
+  navigator.clipboard.writeText(results[idx].text);
+}
+
+// ---- Feature 2: Preview modal ----
+
+function previewCard(idx) {
+  currentPreviewIdx = idx;
+  const r = results[idx];
+  if (!r || r.loading) return;
+  const lang = LANGS.find(l=>l.code===r.lang);
+  const typeLabel = TYPES.find(t=>t.id===currentType).label;
+
+  document.getElementById("previewCardContent").innerHTML = `
+    <div class="rounded-xl overflow-hidden border border-gray-200 shadow-lg">
+      <div class="bg-brand-600 text-white px-5 py-3 flex items-center gap-3">
+        <span class="text-lg">${TYPE_ICONS[currentType] === 'utensils' ? '🍽️' : TYPE_ICONS[currentType] === 'home' ? '🏠' : TYPE_ICONS[currentType] === 'door-open' ? '🚪' : TYPE_ICONS[currentType] === 'id-card' ? '🪪' : '📞'}</span>
+        <span class="font-semibold text-sm">${typeLabel}</span>
+        <span class="ml-auto text-xs bg-white/20 rounded-full px-2 py-0.5">${lang.flag} ${lang.label}</span>
+      </div>
+      <div class="bg-white px-5 py-4 min-h-[120px]">
+        <pre class="text-sm text-gray-800 whitespace-pre-wrap font-sans leading-relaxed">${escapeHtml(r.text)}</pre>
+      </div>
+      <div class="bg-gray-50 px-5 py-2 border-t border-gray-100 text-center">
+        <span class="text-xs text-gray-400">国际宾客支持 · 多语种物料生成</span>
+      </div>
+    </div>`;
+
+  document.getElementById("previewModal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closePreview() {
+  document.getElementById("previewModal").style.display = "none";
+  document.body.style.overflow = "";
+  currentPreviewIdx = -1;
+}
+
+async function exportSingleImage() {
+  if (currentPreviewIdx < 0) return;
+  const r = results[currentPreviewIdx];
+  const lang = LANGS.find(l=>l.code===r.lang);
+  try {
+    const res = await fetch("/api/export-image", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({results:[{lang:r.lang, text:r.text}], materialType:currentType, single:true})
+    });
+    if (!res.ok) { msg("error","图片导出失败"); return; }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = currentType + "-" + r.lang + ".png";
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    msg("error","图片导出失败");
+  }
+}
+
+// ---- Feature 2: Enhanced renderResults ----
+
+function renderResults() {
+  document.getElementById("resultHeader").style.display = results.length > 0 ? "flex" : "none";
+
+  const hasLoading = results.some(r => r.loading);
+  document.getElementById("pdfBtn").disabled = hasLoading && results.length > 0;
+  document.getElementById("imgBtn").disabled = hasLoading && results.length > 0;
+
+  let h = "";
+  results.forEach((r, idx) => {
+    const lang = LANGS.find(l=>l.code===r.lang);
+    const label = lang ? lang.label : r.lang;
+    const flag = lang ? lang.flag : "";
+    const isEditing = editStates[idx];
+
+    if (r.loading) {
+      h += `<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5"><h3 class="text-sm font-semibold text-brand-700 mb-3">${flag} ${label}</h3><div class="space-y-3 animate-pulse"><div class="h-4 bg-gray-200 rounded w-3/4"></div><div class="h-4 bg-gray-200 rounded w-1/2"></div><div class="h-4 bg-gray-200 rounded w-5/6"></div></div></div>`;
+    } else {
+      const displayText = r.text || "";
+      h += `<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-brand-700">${flag} ${label}</h3>
+          <div class="flex items-center gap-0.5">
+            <button onclick="previewCard(${idx})" class="text-xs px-2 py-1 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors">预览</button>
+            <button onclick="editResult(${idx})" class="text-xs px-2 py-1 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors">${isEditing?'取消':'编辑'}</button>
+            <button onclick="regenerateLang(${idx})" class="text-xs px-2 py-1 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors">重新生成</button>
+            <button onclick="copyText(${idx})" class="text-xs px-2 py-1 text-gray-400 hover:text-brand-600 transition-colors">复制</button>
+          </div>
+        </div>
+        ${isEditing ? `
+          <textarea id="edit-ta-${idx}" class="w-full min-h-[120px] p-3 border border-brand-300 rounded-lg text-sm font-sans leading-relaxed resize-y focus:ring-2 focus:ring-brand-500 outline-none">${escapeHtml(displayText)}</textarea>
+          <div class="mt-2 flex gap-2">
+            <button onclick="saveEdit(${idx})" class="text-xs px-4 py-1.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">保存</button>
+          </div>
+        ` : `
+          <pre class="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed max-h-[400px] overflow-y-auto">${escapeHtml(displayText)}</pre>
+        `}
+        <div class="mt-3 pt-3 border-t border-gray-100 flex justify-between text-xs text-gray-400">
+          <span>${displayText.length} 字符</span>
+          <span>${r.edited ? '已编辑' : 'AI翻译'}</span>
+        </div>
+      </div>`;
+    }
+  });
+  document.getElementById("results").innerHTML = h;
+}
+
+async function doTranslate() {
+  const text = document.getElementById("sourceText").value.trim();
+  if (!text) return;
+  if (selectedLangs.length === 0) { msg("error","请至少选择一种语言"); return; }
+
+  document.getElementById("msgBox").style.display = "none";
+  const btn = document.getElementById("translateBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>翻译中...';
+
+  results = selectedLangs.map(l => ({lang:l, text:"", loading:true}));
+  editStates = {};
+  renderResults();
+
+  try {
+    await Promise.all(selectedLangs.map(async (lang, idx) => {
+      const res = await fetch("/api/translate", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({sourceText:text, materialType:currentType, targetLang:lang})
+      });
+      const data = await res.json();
+      if (data.error && res.status === 401) { window.location.href = "/login"; return; }
+      if (data.error && res.status === 429) { msg("error", data.error); results[idx] = {lang, text: data.error, loading:false}; renderResults(); return; }
+      results[idx] = {lang, text: data.translatedText || data.error || "翻译失败", loading:false, edited: false};
+      renderResults();
+    }));
+  } catch(e) {
+    msg("error","网络错误，请检查连接后重试");
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>开始翻译';
+  document.getElementById("pdfBtn").disabled = results.length === 0;
+  document.getElementById("imgBtn").disabled = results.length === 0;
+}
+
+async function exportPdf() {
+  const done = results.filter(r => !r.loading);
+  if (done.length === 0) return;
+  const res = await fetch("/api/export-pdf", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({results:done, materialType:currentType})
+  });
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = currentType + "-multilingual.pdf";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function exportImages() {
+  const done = results.filter(r => !r.loading);
+  if (done.length === 0) return;
+  try {
+    const res = await fetch("/api/export-image", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({results:done, materialType:currentType})
+    });
+    if (!res.ok) { msg("error","图片导出失败"); return; }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = currentType + "-cards.zip";
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    msg("error","图片导出失败");
+  }
+}
+
+async function checkAuth() {
+  try {
+    const res = await fetch("/api/auth/me");
+    const data = await res.json();
+    if (data.authenticated) {
+      document.getElementById("userInfo").textContent = data.phone + " · 今日 " + (data.usage ? data.usage.today + "/" + data.usage.limit : "—");
+      document.getElementById("userInfo").classList.remove("hidden");
+      document.getElementById("logoutLink").classList.remove("hidden");
+    }
+  } catch(e) {}
+}
+</script>
+</body>
+</html>

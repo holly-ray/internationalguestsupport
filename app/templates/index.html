@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WaiBin 国际宾客支持 — Turn your hotel foreign-guest-ready in 10 minutes</title>
+<meta name="description" content="AI驱动的多语种物料生成工具。菜单翻译、Google上架、外卡支付、PSB登记培训、护照识别——帮助中小酒店和餐厅一站式具备国际宾客接待能力。">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
+</head>
+<body class="min-h-screen bg-white text-gray-900 antialiased">
+
+<!-- Nav -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5 shrink-0">
+      <div class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">客</div>
+      <span class="font-bold text-lg text-gray-900 tracking-tight">WaiBin</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 text-sm text-gray-600">
+      <a href="#features" class="hover:text-brand-600 transition-colors">功能介绍</a>
+      <a href="#how-it-works" class="hover:text-brand-600 transition-colors">使用流程</a>
+      <a href="#pricing" class="hover:text-brand-600 transition-colors">套餐价格</a>
+      <a href="#faq" class="hover:text-brand-600 transition-colors">常见问题</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="/login" class="text-sm text-gray-600 hover:text-brand-600 transition-colors">登录</a>
+      <a href="/console" class="bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors shadow-sm">免费使用</a>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="pt-28 pb-20 sm:pt-36 sm:pb-28 bg-gradient-to-br from-slate-900 via-brand-900 to-slate-900 text-white">
+  <div class="max-w-5xl mx-auto px-4 text-center">
+    <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur rounded-full px-4 py-1.5 text-sm mb-8 border border-white/10">
+      <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+      2026 年新规：全国酒店均可接待外宾，不再需要涉外许可
+    </div>
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-6">
+      10 分钟<br class="sm:hidden">让您的酒店具备<span class="bg-gradient-to-r from-brand-200 to-blue-300 bg-clip-text text-transparent">国际宾客接待能力</span>
+    </h1>
+    <p class="text-xl sm:text-2xl text-brand-200/80 font-light mb-4">
+      Turn your hotel foreign-guest-ready in 10 minutes
+    </p>
+    <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed mb-10">
+      菜单翻译、Google 上架、外卡支付、PSB 登记培训、护照识别 ——<br class="hidden sm:block">
+      一个工具搞定民宿/餐馆国际宾客接待的所有准备工作。
+    </p>
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <a href="/console" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-brand-800 px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-50 transition-all shadow-xl shadow-brand-900/30">
+        立即免费试用
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </a>
+      <a href="#features" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-medium text-white border border-white/20 hover:bg-white/10 transition-all">
+        查看功能
+      </a>
+    </div>
+    <p class="mt-6 text-xs text-slate-400">无需绑定银行卡 · 每日 20 次免费翻译 · 随时可取消</p>
+  </div>
+</section>
+
+<!-- Trust bar -->
+<section class="bg-slate-50 border-b border-slate-100">
+  <div class="max-w-7xl mx-auto px-4 py-10">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+      <div><p class="text-3xl font-bold text-brand-600">4+</p><p class="text-sm text-gray-500 mt-1">支持语种</p></div>
+      <div><p class="text-3xl font-bold text-brand-600">50</p><p class="text-sm text-gray-500 mt-1">城市 PSB 机构</p></div>
+      <div><p class="text-3xl font-bold text-brand-600">3</p><p class="text-sm text-gray-500 mt-1">套餐选择</p></div>
+      <div><p class="text-3xl font-bold text-brand-600">&lt;10分钟</p><p class="text-sm text-gray-500 mt-1">平均上手时间</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">一个工具，搞定国际宾客接待</h2>
+      <p class="text-gray-500 max-w-xl mx-auto">从菜单翻译到公安登记，WaiBin 覆盖国际宾客接待全流程。</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="group relative bg-white rounded-2xl border border-gray-100 p-8 hover:shadow-xl hover:border-brand-100 transition-all duration-300">
+        <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">AI 多语种翻译</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">中文菜单、入住指南、房型介绍、紧急联系卡一键翻译成英日韩俄四语，支持 PDF 导出打印。</p>
+      </div>
+
+      <div class="group relative bg-white rounded-2xl border border-gray-100 p-8 hover:shadow-xl hover:border-brand-100 transition-all duration-300">
+        <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Google 商家上架</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">一键创建 Google Maps 商家页面。外国游客用 Google 搜酒店——确保你的店能被搜到，带图带营业时间。</p>
+      </div>
+
+      <div class="group relative bg-white rounded-2xl border border-gray-100 p-8 hover:shadow-xl hover:border-brand-100 transition-all duration-300">
+        <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">外卡支付接入</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">自助诊断当前收款问题，推荐最合适的境外收款方案。Visa / Mastercard / 支付宝国际版 / 微信支付国际版全支持。</p>
+      </div>
+
+      <div class="group relative bg-white rounded-2xl border border-gray-100 p-8 hover:shadow-xl hover:border-brand-100 transition-all duration-300">
+        <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">PSB 登记培训</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">图解 5 步外国客人住宿登记流程。法律依据、所需材料、填表指引、线上/线下办理对比——3 分钟学会合规操作。</p>
+      </div>
+
+      <div class="group relative bg-white rounded-2xl border border-gray-100 p-8 hover:shadow-xl hover:border-brand-100 transition-all duration-300">
+        <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">护照 MRZ 识别</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">输入护照底部两行机读码，自动提取国籍、姓名、生日、护照号。支持 100+ 国家护照，遵循 ICAO 9303 国际标准。</p>
+      </div>
+
+      <div class="group relative bg-white rounded-2xl border border-gray-100 p-8 hover:shadow-xl hover:border-brand-100 transition-all duration-300">
+        <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">出入境机构查询</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">全国 50 个热门旅游城市的出入境管理局地址、电话、办公时间。支持按城市搜索和排序，帮你和客人快速找到最近的办理点。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section id="how-it-works" class="py-24 bg-slate-50">
+  <div class="max-w-5xl mx-auto px-4">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">三步开始接待外宾</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-brand-600 text-white rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-5 shadow-lg shadow-brand-600/20">1</div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">手机号登录</h3>
+        <p class="text-sm text-gray-500">输入手机号获取验证码，无需邮箱、无需密码、无需绑卡。即开即用。</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 bg-brand-600 text-white rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-5 shadow-lg shadow-brand-600/20">2</div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">翻译 & 设置</h3>
+        <p class="text-sm text-gray-500">粘贴中文菜单或指南，选语言，AI 秒出翻译。同步上架 Google Maps、诊断支付方案。</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 bg-brand-600 text-white rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-5 shadow-lg shadow-brand-600/20">3</div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">打印 & 接待</h3>
+        <p class="text-sm text-gray-500">导出 PDF 放在前台或贴墙上。按培训指南完成客人登记——你已准备好接待全世界的客人。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">免费起步，按需升级</h2>
+      <p class="text-gray-500 max-w-xl mx-auto">所有套餐均含核心翻译和合规工具。升级享受更高配额和高级功能。</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      <!-- Free -->
+      <div class="bg-white rounded-2xl border-2 border-gray-200 p-8 flex flex-col">
+        <div class="mb-6">
+          <h3 class="text-xl font-bold text-gray-900">免费版</h3>
+          <p class="text-sm text-gray-500 mt-1">适合刚起步的小民宿</p>
+          <div class="mt-4">
+            <span class="text-4xl font-extrabold text-gray-900">¥0</span>
+            <span class="text-sm text-gray-500">/月</span>
+          </div>
+        </div>
+        <ul class="space-y-3 mb-8 flex-1">
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>每日翻译 20 次</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>4 语种（英日韩俄）</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>PDF / 图片导出</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Google 商家（3 次/月）</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>PSB 培训 + MRZ 工具</li>
+        </ul>
+        <a href="/console" class="block text-center py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">免费使用</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="bg-white rounded-2xl border-2 border-brand-500 p-8 flex flex-col relative shadow-xl shadow-brand-500/10">
+        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-brand-600 text-white text-xs font-bold rounded-full tracking-wide">最受欢迎</div>
+        <div class="mb-6">
+          <h3 class="text-xl font-bold text-gray-900">专业版</h3>
+          <p class="text-sm text-gray-500 mt-1">适合有稳定外宾流量的酒店/餐厅</p>
+          <div class="mt-4">
+            <span class="text-4xl font-extrabold text-gray-900">¥29</span>
+            <span class="text-sm text-gray-500">/月</span>
+          </div>
+        </div>
+        <ul class="space-y-3 mb-8 flex-1">
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>每日翻译 200 次</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>8 语种（+ 法德西阿）</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>PDF 含企业 Logo</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Google 商家无限次</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>翻译记录搜索</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>优先客服支持</li>
+        </ul>
+        <a href="/subscription" class="block text-center py-3 bg-brand-600 text-white rounded-xl font-semibold hover:bg-brand-700 transition-colors shadow-md">升级到专业版</a>
+      </div>
+
+      <!-- Business -->
+      <div class="bg-white rounded-2xl border-2 border-gray-200 p-8 flex flex-col">
+        <div class="mb-6">
+          <h3 class="text-xl font-bold text-gray-900">企业版</h3>
+          <p class="text-sm text-gray-500 mt-1">适合连锁品牌和高流量商户</p>
+          <div class="mt-4">
+            <span class="text-4xl font-extrabold text-gray-900">¥99</span>
+            <span class="text-sm text-gray-500">/月</span>
+          </div>
+        </div>
+        <ul class="space-y-3 mb-8 flex-1">
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>每日翻译 1,000 次</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>12 语种</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>批量翻译</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>记录导出（CSV/Excel）</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>专属客户经理</li>
+          <li class="flex items-start gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>API 对接支持</li>
+        </ul>
+        <a href="/subscription" class="block text-center py-3 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-900 transition-colors">升级到企业版</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-24 bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 text-white">
+  <div class="max-w-4xl mx-auto px-4 text-center">
+    <h2 class="text-3xl sm:text-4xl font-bold mb-4">准备好接待全世界了吗？</h2>
+    <p class="text-brand-100 text-lg mb-2">Turn your hotel foreign-guest-ready in 10 minutes</p>
+    <p class="text-brand-200/70 text-sm mb-10">已有数百家酒店和餐厅在使用 WaiBin。免费开始，无需绑定银行卡。</p>
+    <a href="/console" class="inline-flex items-center gap-2 bg-white text-brand-700 px-10 py-4 rounded-xl font-bold text-lg hover:bg-brand-50 transition-all shadow-xl">
+      开始免费试用
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="py-24 bg-white">
+  <div class="max-w-3xl mx-auto px-4">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">常见问题</h2>
+    </div>
+    <div class="space-y-4">
+      <details class="group border border-gray-200 rounded-xl p-5 hover:border-brand-200 transition-colors" open>
+        <summary class="text-lg font-semibold text-gray-900 cursor-pointer list-none flex items-center justify-between">
+          接待外国客人需要办理哪些手续？
+          <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <p class="mt-3 text-sm text-gray-600 leading-relaxed">根据中国法律，所有酒店和民宿必须在外国客人入住 24 小时内向当地公安机关（PSB）办理住宿登记。WaiBin 的 PSB 培训指南会带你一步步了解所需材料、填表流程和线上线下办理方式。</p>
+      </details>
+
+      <details class="group border border-gray-200 rounded-xl p-5 hover:border-brand-200 transition-colors">
+        <summary class="text-lg font-semibold text-gray-900 cursor-pointer list-none flex items-center justify-between">
+          翻译支持哪些语言？准确吗？
+          <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <p class="mt-3 text-sm text-gray-600 leading-relaxed">免费版支持英语、日语、韩语、俄语；专业版增加法语、德语、西班牙语、阿拉伯语；企业版支持 12 语种。翻译由 DeepSeek AI 驱动，针对餐饮和酒店行业做了专门优化。重要物料建议人工复核。</p>
+      </details>
+
+      <details class="group border border-gray-200 rounded-xl p-5 hover:border-brand-200 transition-colors">
+        <summary class="text-lg font-semibold text-gray-900 cursor-pointer list-none flex items-center justify-between">
+          外国客人没有微信/支付宝怎么付款？
+          <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <p class="mt-3 text-sm text-gray-600 leading-relaxed">我们提供支付诊断工具和接入教程，覆盖多种方案：银行 POS 机开通外卡（Visa/Mastercard）、微信支付国际版（支持绑定境外信用卡）、支付宝国际版、连连国际、Airwallex 空中云汇等。诊断工具会根据你的情况推荐最优方案。</p>
+      </details>
+
+      <details class="group border border-gray-200 rounded-xl p-5 hover:border-brand-200 transition-colors">
+        <summary class="text-lg font-semibold text-gray-900 cursor-pointer list-none flex items-center justify-between">
+          客人护照信息会不会泄露？
+          <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <p class="mt-3 text-sm text-gray-600 leading-relaxed">MRZ 护照识别工具在浏览器端完成解析，不会上传护照图片。翻译内容发送到 DeepSeek API 处理，但不会长期存储。我们不出售或分享用户数据。</p>
+      </details>
+
+      <details class="group border border-gray-200 rounded-xl p-5 hover:border-brand-200 transition-colors">
+        <summary class="text-lg font-semibold text-gray-900 cursor-pointer list-none flex items-center justify-between">
+          手机上能用吗？
+          <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <p class="mt-3 text-sm text-gray-600 leading-relaxed">完全适配。整个控制台、翻译工具和培训页面在手机浏览器上完整可用，无需下载 App。</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="border-t border-gray-200 bg-slate-50">
+  <div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">客</div>
+          <span class="font-bold text-gray-900">WaiBin</span>
+        </div>
+        <p class="text-xs text-gray-400 leading-relaxed">让中小商户也能接待全世界。</p>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-gray-900 mb-3">工具</p>
+        <ul class="space-y-2 text-sm text-gray-500">
+          <li><a href="/dashboard" class="hover:text-brand-600 transition-colors">物料翻译</a></li>
+          <li><a href="/gmb" class="hover:text-brand-600 transition-colors">Google 商家</a></li>
+          <li><a href="/psb/mrz" class="hover:text-brand-600 transition-colors">MRZ 识别</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-gray-900 mb-3">指南</p>
+        <ul class="space-y-2 text-sm text-gray-500">
+          <li><a href="/psb" class="hover:text-brand-600 transition-colors">PSB 培训</a></li>
+          <li><a href="/psb/passport-guide" class="hover:text-brand-600 transition-colors">护照识别</a></li>
+          <li><a href="/payment/tutorials" class="hover:text-brand-600 transition-colors">支付接入</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-gray-900 mb-3">账户</p>
+        <ul class="space-y-2 text-sm text-gray-500">
+          <li><a href="/login" class="hover:text-brand-600 transition-colors">登录</a></li>
+          <li><a href="/subscription" class="hover:text-brand-600 transition-colors">套餐价格</a></li>
+          <li><a href="/beta/feedback" class="hover:text-brand-600 transition-colors">意见反馈</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-xs text-gray-400">WaiBin 国际宾客支持 · AI 翻译结果建议人工复核 · 不构成法律合规建议</p>
+      <div class="flex items-center gap-4 text-xs text-gray-400">
+        <a href="/psb/contacts" class="hover:text-brand-600 transition-colors">机构查询</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

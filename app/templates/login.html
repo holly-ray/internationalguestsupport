@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 - 国际宾客支持</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
+</head>
+<body class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+
+<div class="w-full max-w-sm">
+  <!-- Logo -->
+  <div class="text-center mb-8">
+    <div class="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center text-white font-bold mx-auto mb-3">客</div>
+    <h1 class="text-xl font-semibold text-gray-900">国际宾客支持</h1>
+    <p class="text-sm text-gray-500 mt-1">登录或注册，开始生成多语种物料</p>
+  </div>
+
+  <!-- Form -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div id="errorBox" class="hidden mb-4 p-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-800"></div>
+
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1.5">手机号码</label>
+      <input id="phoneInput" type="tel" maxlength="11" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="请输入手机号码" autocomplete="tel">
+    </div>
+
+    <div class="mb-5">
+      <label class="block text-sm font-medium text-gray-700 mb-1.5">验证码</label>
+      <div class="flex gap-2">
+        <input id="codeInput" type="text" maxlength="6" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="验证码" autocomplete="one-time-code">
+        <button id="sendBtn" onclick="sendCode()" class="px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm font-medium text-brand-600 hover:border-brand-400 hover:bg-brand-50 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">发送验证码</button>
+      </div>
+    </div>
+
+    <button id="loginBtn" onclick="verifyCode()" class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors disabled:opacity-50">登录 / 注册</button>
+
+    <p id="demoHint" class="mt-4 text-center text-xs text-gray-400">演示模式：验证码为 1234</p>
+  </div>
+
+  <p class="mt-6 text-center text-xs text-gray-400">
+    <a href="/" class="hover:text-brand-600">返回首页</a>
+  </p>
+</div>
+
+<script>
+let countdown = 0;
+let timer = null;
+
+function showError(msg) {
+  const box = document.getElementById("errorBox");
+  box.textContent = msg;
+  box.classList.remove("hidden");
+}
+
+function hideError() {
+  document.getElementById("errorBox").classList.add("hidden");
+}
+
+async function sendCode() {
+  hideError();
+  const phone = document.getElementById("phoneInput").value.trim();
+  if (!/^1\d{10}$/.test(phone)) {
+    showError("请输入有效的11位手机号码");
+    return;
+  }
+  if (countdown > 0) return;
+
+  const btn = document.getElementById("sendBtn");
+  btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/auth/send-code", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({phone})
+    });
+    const data = await res.json();
+    if (data.error) {
+      showError(data.error);
+      btn.disabled = false;
+      return;
+    }
+    if (data.code) {
+      document.getElementById("demoHint").textContent = "演示模式：验证码为 " + data.code;
+      document.getElementById("demoHint").classList.remove("hidden");
+    }
+    countdown = 60;
+    btn.textContent = countdown + "s";
+    timer = setInterval(() => {
+      countdown--;
+      if (countdown <= 0) {
+        clearInterval(timer);
+        btn.textContent = "发送验证码";
+        btn.disabled = false;
+      } else {
+        btn.textContent = countdown + "s";
+      }
+    }, 1000);
+  } catch(e) {
+    showError("网络错误，请重试");
+    btn.disabled = false;
+  }
+}
+
+async function verifyCode() {
+  hideError();
+  const phone = document.getElementById("phoneInput").value.trim();
+  const code = document.getElementById("codeInput").value.trim();
+
+  if (!phone || !code) {
+    showError("请输入手机号和验证码");
+    return;
+  }
+
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true;
+  btn.textContent = "验证中...";
+
+  try {
+    const res = await fetch("/api/auth/verify-code", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({phone, code})
+    });
+    const data = await res.json();
+    if (data.error) {
+      showError(data.error);
+      btn.disabled = false;
+      btn.textContent = "登录 / 注册";
+      return;
+    }
+    if (data.redirect) {
+      window.location.href = data.redirect;
+    }
+  } catch(e) {
+    showError("网络错误，请重试");
+    btn.disabled = false;
+    btn.textContent = "登录 / 注册";
+  }
+}
+
+// Enter key submits
+document.getElementById("codeInput").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") verifyCode();
+});
+document.getElementById("phoneInput").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") sendCode();
+});
+</script>
+</body>
+</html>

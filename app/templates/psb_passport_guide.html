@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>护照 MRZ 识别指南 - 国际宾客支持</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+  <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+    <a href="/console" class="flex items-center gap-2 hover:opacity-80">
+      <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">客</div>
+      <span class="font-semibold text-gray-900 text-sm">国际宾客支持</span>
+    </a>
+    <a href="/psb/mrz" class="text-sm text-gray-500 hover:text-brand-600">← MRZ 识别工具</a>
+  </div>
+</header>
+
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-1">护照 MRZ 识别指南</h1>
+    <p class="text-gray-500 text-sm">了解什么是 MRZ，如何在不同国家的护照上找到它</p>
+  </div>
+
+  <!-- What is MRZ -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">什么是 MRZ？</h2>
+    <div class="text-sm text-gray-700 leading-relaxed space-y-3">
+      <p>MRZ（Machine Readable Zone，机器可读区）是护照底部两行由字母、数字和 "<" 符号组成的文字。它遵循 ICAO 9303 国际标准，所有国家的机器可读护照都采用相同格式。</p>
+      <div class="bg-gray-900 text-green-400 font-mono text-xs p-4 rounded-lg overflow-x-auto">
+        P&lt;CHNEXAMPLE&lt;&lt;NAME&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<br>
+        E12345678&lt;CHN8001010M2501010&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;00
+      </div>
+      <p>MRZ 包含以下信息：姓名、护照号码、国籍、出生日期、性别、有效期。使用我们的 <a href="/psb/mrz" class="text-brand-600 hover:underline">MRZ 识别工具</a> 可以一键提取这些信息。</p>
+    </div>
+  </div>
+
+  <!-- How to read MRZ -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">MRZ 结构解析（标准护照 TD3）</h2>
+    <div class="text-sm text-gray-700 leading-relaxed space-y-3">
+      <p>标准护照 MRZ 由两行各 44 个字符组成：</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs border border-gray-200 rounded-lg overflow-hidden">
+          <thead class="bg-gray-50">
+            <tr><th class="px-3 py-1.5 text-left font-medium text-gray-500">行</th><th class="px-3 py-1.5 text-left font-medium text-gray-500">位置</th><th class="px-3 py-1.5 text-left font-medium text-gray-500">内容</th><th class="px-3 py-1.5 text-left font-medium text-gray-500">示例</th></tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr><td class="px-3 py-1.5 font-mono">第 1 行</td><td class="px-3 py-1.5 font-mono">1</td><td class="px-3 py-1.5">证件类型（P = 护照）</td><td class="px-3 py-1.5 font-mono">P</td></tr>
+            <tr class="bg-gray-50"><td class="px-3 py-1.5 font-mono">第 1 行</td><td class="px-3 py-1.5 font-mono">2-3</td><td class="px-3 py-1.5">签发国代码（ISO 3166-1 alpha-3）</td><td class="px-3 py-1.5 font-mono">CHN</td></tr>
+            <tr><td class="px-3 py-1.5 font-mono">第 1 行</td><td class="px-3 py-1.5 font-mono">6-44</td><td class="px-3 py-1.5">姓名：姓 + &lt;&lt; + 名（&lt; 分隔多个词）</td><td class="px-3 py-1.5 font-mono">EXAMPLE&lt;&lt;NAME</td></tr>
+            <tr class="bg-gray-50"><td class="px-3 py-1.5 font-mono">第 2 行</td><td class="px-3 py-1.5 font-mono">1-9</td><td class="px-3 py-1.5">护照号码（&lt; 填充）</td><td class="px-3 py-1.5 font-mono">E12345678</td></tr>
+            <tr><td class="px-3 py-1.5 font-mono">第 2 行</td><td class="px-3 py-1.5 font-mono">10</td><td class="px-3 py-1.5">护照号码校验位</td><td class="px-3 py-1.5 font-mono">3</td></tr>
+            <tr class="bg-gray-50"><td class="px-3 py-1.5 font-mono">第 2 行</td><td class="px-3 py-1.5 font-mono">11-13</td><td class="px-3 py-1.5">国籍代码（ISO 3166-1 alpha-3）</td><td class="px-3 py-1.5 font-mono">CHN</td></tr>
+            <tr><td class="px-3 py-1.5 font-mono">第 2 行</td><td class="px-3 py-1.5 font-mono">14-19</td><td class="px-3 py-1.5">出生日期（YYMMDD）</td><td class="px-3 py-1.5 font-mono">800101</td></tr>
+            <tr class="bg-gray-50"><td class="px-3 py-1.5 font-mono">第 2 行</td><td class="px-3 py-1.5 font-mono">20</td><td class="px-3 py-1.5">出生日期校验位</td><td class="px-3 py-1.5 font-mono">0</td></tr>
+            <tr><td class="px-3 py-1.5 font-mono">第 2 行</td><td class="px-3 py-1.5 font-mono">21</td><td class="px-3 py-1.5">性别（M = 男，F = 女）</td><td class="px-3 py-1.5 font-mono">M</td></tr>
+            <tr class="bg-gray-50"><td class="px-3 py-1.5 font-mono">第 2 行</td><td class="px-3 py-1.5 font-mono">22-27</td><td class="px-3 py-1.5">有效期至（YYMMDD）</td><td class="px-3 py-1.5 font-mono">250101</td></tr>
+            <tr><td class="px-3 py-1.5 font-mono">第 2 行</td><td class="px-3 py-1.5 font-mono">28</td><td class="px-3 py-1.5">有效期校验位</td><td class="px-3 py-1.5 font-mono">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Country-specific guides -->
+  <div class="mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">各国护照 MRZ 位置说明</h2>
+    <p class="text-sm text-gray-500 mb-4">所有 ICAO 9303 标准护照的 MRZ 都位于护照照片页底部，以下是各主要客源国护照的特点：</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇺🇸</span>
+          <span class="font-medium text-gray-900">美国护照 (USA)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。护照号码以大写字母开头，共 9 位。资料页上方印有"United States of America"。</p>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇬🇧</span>
+          <span class="font-medium text-gray-900">英国护照 (GBR)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。护照号码为红色，9 位数字。资料页含持证人照片和全息防伪图案。</p>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇯🇵</span>
+          <span class="font-medium text-gray-900">日本护照 (JPN)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。日本护照有 5 年和 10 年两种有效期。护照号码为两位字母 + 七位数字。</p>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇰🇷</span>
+          <span class="font-medium text-gray-900">韩国护照 (KOR)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。韩国护照号码以 M 开头。资料页含韩文和英文双语信息。</p>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇷🇺</span>
+          <span class="font-medium text-gray-900">俄罗斯护照 (RUS)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。俄罗斯护照 MRZ 中姓名使用西里尔字母音译的拉丁字母（如 Ivanov → IVANOV）。</p>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇩🇪</span>
+          <span class="font-medium text-gray-900">德国护照 (DEU)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。德国护照为酒红色封面。护照号码为 9 位，含字母和数字。</p>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇫🇷</span>
+          <span class="font-medium text-gray-900">法国护照 (FRA)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。法国护照为酒红色封面。护照号码为两位数字 + 两位字母 + 五位数字。</p>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇦🇺</span>
+          <span class="font-medium text-gray-900">澳大利亚护照 (AUS)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。澳洲护照为深蓝色封面。护照号码以字母开头，共 9 位。</p>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇨🇦</span>
+          <span class="font-medium text-gray-900">加拿大护照 (CAN)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。加拿大护照为深蓝色封面。护照号码为两位字母 + 六位数字。</p>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇸🇬</span>
+          <span class="font-medium text-gray-900">新加坡护照 (SGP)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。新加坡护照为红色封面。护照号码以字母 K 或 E 开头。</p>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇲🇾</span>
+          <span class="font-medium text-gray-900">马来西亚护照 (MYS)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。马来西亚护照为红色封面。护照号码以两位字母开头。</p>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🇹🇭</span>
+          <span class="font-medium text-gray-900">泰国护照 (THA)</span>
+        </div>
+        <p class="text-xs text-gray-500">MRZ 位于资料页底部。泰国护照为深蓝色封面。MRZ 中姓名使用泰语音译的拉丁字母。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tips -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">填写 MRZ 的小技巧</h2>
+    <div class="text-sm text-gray-700 leading-relaxed space-y-2">
+      <ul class="list-disc pl-5 space-y-1">
+        <li><strong>"&lt;" 不是"小于号"</strong>——它是 MRZ 的填充字符，输入时用键盘上的小于号键（通常 Shift+,）即可</li>
+        <li><strong>注意字母和数字的混淆</strong>——MRZ 中不会出现字母 O（只使用数字 0），不会出现字母 I（使用数字 1）</li>
+        <li><strong>大小写无所谓</strong>——我们的工具会自动转换为大写</li>
+        <li><strong>粘贴时检查换行</strong>——从 PDF 或图片 OCR 复制时可能引入换行符，粘贴到工具后检查两行是否完整（第一行 44 字符，第二行 44 字符）</li>
+        <li><strong>旧版护照（非机读）</strong>——2000 年以前签发的部分护照可能没有 MRZ 区，需手动录入信息</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="text-center">
+    <a href="/psb/mrz" class="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">
+      打开 MRZ 识别工具
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</div>
+
+<footer class="border-t border-gray-200 bg-white mt-12">
+  <div class="max-w-5xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+    <p>MRZ 格式遵循 ICAO 9303 国际标准，所有国家的机器可读护照都遵循相同格式。</p>
+  </div>
+</footer>
+</body>
+</html>

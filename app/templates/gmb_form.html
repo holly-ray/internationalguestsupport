@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>填写商家信息 - Google 商家 - 国际宾客支持</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+  <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+    <a href="/console" class="flex items-center gap-2 hover:opacity-80">
+      <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">客</div>
+      <span class="font-semibold text-gray-900 text-sm">国际宾客支持</span>
+    </a>
+    <a href="/gmb" class="text-sm text-gray-500 hover:text-brand-600">← 返回</a>
+  </div>
+</header>
+
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold text-gray-900 mb-1">创建 Google 商家资料</h1>
+  <p class="text-gray-500 text-sm mb-8">填写以下信息，一键将您的商家发布到 Google 搜索和 Google Maps。</p>
+
+  <div id="msgBox" class="hidden mb-6 p-4 rounded-xl text-sm"></div>
+
+  <form id="gmbForm" onsubmit="submitListing(event)" class="space-y-6">
+    <!-- Basic Info -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">基本信息</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">商家名称 <span class="text-red-500">*</span></label>
+          <input type="text" id="storeName" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="如：老张川菜馆">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">商家类别</label>
+          <select id="primaryCategory" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white">
+            <option value="">请选择类别</option>
+            <option value="gcid:restaurant">餐厅</option>
+            <option value="gcid:chinese_restaurant">中餐馆</option>
+            <option value="gcid:hotel">酒店</option>
+            <option value="gcid:bed_and_breakfast">民宿 / B&amp;B</option>
+            <option value="gcid:retail_store">零售商店</option>
+            <option value="gcid:cafe">咖啡馆</option>
+            <option value="gcid:bar">酒吧</option>
+          </select>
+          <p class="text-xs text-gray-400 mt-1">选择最匹配的类别有助于搜索排名</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+          <input type="tel" id="primaryPhone" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="如：+86 138-0000-1234">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">网站（选填）</label>
+          <input type="url" id="websiteUrl" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="https://">
+        </div>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">地址信息</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">详细地址</label>
+          <input type="text" id="addressLines" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="如：朝阳区三里屯路19号">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">城市</label>
+          <input type="text" id="locality" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="如：北京市">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">省份/州</label>
+          <input type="text" id="administrativeArea" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="如：北京">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">邮政编码</label>
+          <input type="text" id="postalCode" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="如：100027">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">国家/地区</label>
+          <input type="text" id="regionCode" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" value="CN" placeholder="CN">
+        </div>
+      </div>
+    </div>
+
+    <!-- Hours -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">营业时间</h2>
+      <p class="text-xs text-gray-500 mb-4">留空表示不设置营业时间（可后续在 Google 商家后台修改）</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-700 w-20">星期一</span>
+          <input type="time" id="monOpen" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32"> <span class="text-xs text-gray-400">至</span>
+          <input type="time" id="monClose" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32">
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-700 w-20">星期二</span>
+          <input type="time" id="tueOpen" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32"> <span class="text-xs text-gray-400">至</span>
+          <input type="time" id="tueClose" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32">
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-700 w-20">星期三</span>
+          <input type="time" id="wedOpen" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32"> <span class="text-xs text-gray-400">至</span>
+          <input type="time" id="wedClose" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32">
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-700 w-20">星期四</span>
+          <input type="time" id="thuOpen" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32"> <span class="text-xs text-gray-400">至</span>
+          <input type="time" id="thuClose" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32">
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-700 w-20">星期五</span>
+          <input type="time" id="friOpen" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32"> <span class="text-xs text-gray-400">至</span>
+          <input type="time" id="friClose" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32">
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-700 w-20">星期六</span>
+          <input type="time" id="satOpen" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32"> <span class="text-xs text-gray-400">至</span>
+          <input type="time" id="satClose" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32">
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-700 w-20">星期日</span>
+          <input type="time" id="sunOpen" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32"> <span class="text-xs text-gray-400">至</span>
+          <input type="time" id="sunClose" class="px-2 py-2 border border-gray-300 rounded-lg text-sm w-32">
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">商家描述</h2>
+      <textarea id="description" rows="4" maxlength="750" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-y" placeholder="介绍一下您的商家特色……（最长 750 字符）"></textarea>
+      <p class="text-xs text-gray-400 mt-1"><span id="descCount">0</span> / 750 字符</p>
+    </div>
+
+    <!-- Photos -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">商家照片</h2>
+      <p class="text-xs text-gray-500 mb-4">输入图片 URL（需公网可访问）。可后续在 Google 商家后台上传更多照片。</p>
+      <div class="space-y-3" id="photoInputs">
+        <div class="flex items-center gap-3">
+          <input type="url" class="photo-url w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="https://example.com/photo1.jpg">
+        </div>
+      </div>
+      <button type="button" onclick="addPhotoInput()" class="mt-2 text-sm text-brand-600 hover:text-brand-700 font-medium">+ 添加更多照片</button>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" id="submitBtn" class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors flex items-center justify-center gap-2">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+      一键创建 Google 商家
+    </button>
+  </form>
+</div>
+
+<footer class="border-t border-gray-200 bg-white mt-12">
+  <div class="max-w-5xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+    <p>提交后，Google 通常需要 24-48 小时审核。审核通过后商家信息将出现在 Google 搜索和地图中。</p>
+  </div>
+</footer>
+
+<script>
+const DAYS = ["mon","tue","wed","thu","fri","sat","sun"];
+
+document.getElementById("description").addEventListener("input", function() {
+  document.getElementById("descCount").textContent = this.value.length;
+});
+
+function addPhotoInput() {
+  const div = document.createElement("div");
+  div.className = "flex items-center gap-3";
+  div.innerHTML = `<input type="url" class="photo-url w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="https://example.com/photo.jpg"><button type="button" onclick="this.parentElement.remove()" class="text-xs text-red-400 hover:text-red-600 shrink-0">删除</button>`;
+  document.getElementById("photoInputs").appendChild(div);
+}
+
+function msg(type, text) {
+  const box = document.getElementById("msgBox");
+  box.className = "mb-6 p-4 rounded-xl text-sm " + (type === "error" ? "bg-red-50 border border-red-200 text-red-800" : "bg-green-50 border border-green-200 text-green-800");
+  box.textContent = text;
+  box.style.display = "block";
+}
+
+async function submitListing(e) {
+  e.preventDefault();
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>提交中…';
+
+  // Collect hours
+  const periods = [];
+  DAYS.forEach((day, idx) => {
+    const openEl = document.getElementById(day + "Open");
+    const closeEl = document.getElementById(day + "Close");
+    if (openEl && closeEl && openEl.value && closeEl.value) {
+      periods.push({
+        openDay: idx,
+        openTime: openEl.value.replace(":", ""),
+        closeDay: idx,
+        closeTime: closeEl.value.replace(":", ""),
+      });
+    }
+  });
+
+  // Collect photo URLs
+  const photos = [];
+  document.querySelectorAll(".photo-url").forEach(input => {
+    const url = input.value.trim();
+    if (url) photos.push(url);
+  });
+
+  const data = {
+    storeName: document.getElementById("storeName").value.trim(),
+    primaryCategory: document.getElementById("primaryCategory").value,
+    primaryPhone: document.getElementById("primaryPhone").value.trim(),
+    websiteUrl: document.getElementById("websiteUrl").value.trim(),
+    address: {
+      addressLines: document.getElementById("addressLines").value.trim(),
+      locality: document.getElementById("locality").value.trim(),
+      administrativeArea: document.getElementById("administrativeArea").value.trim(),
+      postalCode: document.getElementById("postalCode").value.trim(),
+      regionCode: document.getElementById("regionCode").value.trim() || "CN",
+    },
+    regularHours: periods.length > 0 ? { periods } : null,
+    description: document.getElementById("description").value.trim(),
+    photoUrls: photos,
+  };
+
+  try {
+    const res = await fetch("/api/gmb/create", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+
+    if (res.ok && result.success) {
+      msg("success", `商家 "${result.location_name}" 创建成功！Google 审核通常需要 24-48 小时。`);
+      btn.innerHTML = '✓ 创建成功';
+      btn.classList.replace("bg-brand-600", "bg-green-600");
+      btn.classList.replace("hover:bg-brand-700", "hover:bg-green-700");
+      setTimeout(() => { window.location.href = "/gmb"; }, 3000);
+    } else {
+      msg("error", result.error || "创建失败，请重试");
+      btn.disabled = false;
+      btn.innerHTML = '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>一键创建 Google 商家';
+    }
+  } catch(e) {
+    msg("error", "网络错误，请检查连接后重试");
+    btn.disabled = false;
+    btn.innerHTML = '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>一键创建 Google 商家';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>支付诊断 - 国际宾客支持</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+  <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+    <a href="/console" class="flex items-center gap-2 hover:opacity-80">
+      <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">客</div>
+      <span class="font-semibold text-gray-900 text-sm">国际宾客支持</span>
+    </a>
+    <a href="/console" class="text-sm text-gray-500 hover:text-brand-600">← 返回控制台</a>
+  </div>
+</header>
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold text-gray-900 mb-1">支付方案诊断</h1>
+  <p class="text-gray-500 text-sm mb-8">回答 6 个问题，帮您找到最合适的境外收款方案</p>
+
+  <div id="msgBox" class="hidden mb-6 p-4 rounded-xl text-sm"></div>
+
+  <!-- Wizard -->
+  <div id="wizard">
+    <!-- Progress -->
+    <div class="mb-8">
+      <div class="flex justify-between text-xs text-gray-500 mb-2">
+        <span>进度</span>
+        <span id="stepLabel">第 1 / 6 题</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2">
+        <div id="progressBar" class="bg-brand-600 h-2 rounded-full transition-all duration-300" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Question area -->
+    <div id="questionArea" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6"></div>
+
+    <!-- Navigation -->
+    <div class="flex justify-between">
+      <button id="prevBtn" onclick="prevStep()" class="px-5 py-2.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors disabled:opacity-50" disabled>上一题</button>
+      <button id="nextBtn" onclick="nextStep()" class="px-5 py-2.5 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 transition-colors">下一题</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results" class="hidden">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-gray-900">诊断结果</h2>
+      <button onclick="restart()" class="text-sm text-brand-600 hover:underline">重新诊断</button>
+    </div>
+    <div id="resultsList"></div>
+  </div>
+</div>
+
+<footer class="border-t border-gray-200 bg-white mt-12">
+  <div class="max-w-5xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+    <p>诊断结果基于您的业务特征计算得出，仅供参考。具体费率以支付平台官网为准。</p>
+  </div>
+</footer>
+
+<script>
+const QUESTIONS = [
+  {
+    id: "business_type",
+    label: "您的商户类型是？",
+    options: [
+      {value:"restaurant",label:"餐饮/餐厅",icon:"🍽️"},
+      {value:"hotel",label:"酒店/民宿",icon:"🏠"},
+      {value:"retail",label:"零售/商店",icon:"🛍️"},
+      {value:"other",label:"其他服务",icon:"💼"},
+    ]
+  },
+  {
+    id: "monthly_volume",
+    label: "预计每月境外收款金额？",
+    options: [
+      {value:"low",label:"1 万元以下",desc:"刚开始接待外宾，小额收款"},
+      {value:"medium",label:"1 万 — 5 万元",desc:"有一定外宾客流"},
+      {value:"high",label:"5 万元以上",desc:"外宾业务已成规模"},
+    ]
+  },
+  {
+    id: "customer_type",
+    label: "主要接待的外宾类型？",
+    options: [
+      {value:"mixed",label:"中外游客都有",desc:"兼顾本地和境外顾客"},
+      {value:"foreign",label:"主要是外国游客",desc:"以境外顾客为主"},
+    ]
+  },
+  {
+    id: "has_pos",
+    label: "是否已有 POS 刷卡机？",
+    options: [
+      {value:"yes",label:"有",desc:"已经安装了银行 POS 机"},
+      {value:"no",label:"没有",desc:"尚未安装 POS 机"},
+    ]
+  },
+  {
+    id: "tech_level",
+    label: "您的技术操作水平？",
+    options: [
+      {value:"basic",label:"基础",desc:"会使用手机 App"},
+      {value:"intermediate",label:"中等",desc:"会操作电脑后台系统"},
+      {value:"advanced",label:"熟练",desc:"有技术团队或懂 API 集成"},
+    ]
+  },
+  {
+    id: "settlement_urgency",
+    label: "对结算速度的要求？",
+    options: [
+      {value:"fast",label:"越快越好",desc:"T+0 或 T+1 到账"},
+      {value:"normal",label:"正常即可",desc:"T+3 左右到账即可"},
+    ]
+  },
+];
+
+let step = 0;
+let answers = {};
+let diagnosisResults = null;
+
+function renderQuestion() {
+  if (step >= QUESTIONS.length) {
+    submitDiagnosis();
+    return;
+  }
+  const q = QUESTIONS[step];
+  document.getElementById("stepLabel").textContent = `第 ${step + 1} / ${QUESTIONS.length} 题`;
+  document.getElementById("progressBar").style.width = ((step / QUESTIONS.length) * 100) + "%";
+  document.getElementById("prevBtn").disabled = step === 0;
+
+  const selected = answers[q.id] || "";
+  let html = `<h3 class="text-lg font-semibold text-gray-900 mb-4">${q.label}</h3><div class="space-y-3">`;
+  q.options.forEach(opt => {
+    const isSel = selected === opt.value;
+    html += `
+      <div onclick="selectOption('${q.id}','${opt.value}')" class="cursor-pointer rounded-xl border-2 p-4 transition-all ${isSel ? 'border-brand-600 bg-brand-50' : 'border-gray-200 hover:border-brand-300'}">
+        <div class="flex items-center gap-3">
+          ${opt.icon ? `<span class="text-2xl">${opt.icon}</span>` : ""}
+          <div>
+            <p class="font-medium text-sm text-gray-900">${opt.label}</p>
+            ${opt.desc ? `<p class="text-xs text-gray-500 mt-0.5">${opt.desc}</p>` : ""}
+          </div>
+          ${isSel ? '<div class="ml-auto w-5 h-5 bg-brand-600 rounded-full flex items-center justify-center"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>' : '<div class="ml-auto w-5 h-5 border-2 border-gray-300 rounded-full"></div>'}
+        </div>
+      </div>`;
+  });
+  html += "</div>";
+  document.getElementById("questionArea").innerHTML = html;
+  document.getElementById("nextBtn").textContent = step === QUESTIONS.length - 1 ? "查看推荐方案" : "下一题";
+}
+
+function selectOption(qid, value) {
+  answers[qid] = value;
+  renderQuestion();
+}
+
+function nextStep() {
+  const q = QUESTIONS[step];
+  if (!answers[q.id]) return;
+  step++;
+  renderQuestion();
+}
+
+function prevStep() {
+  if (step > 0) step--;
+  renderQuestion();
+}
+
+async function submitDiagnosis() {
+  document.getElementById("wizard").style.display = "none";
+  document.getElementById("results").classList.remove("hidden");
+
+  if (diagnosisResults) {
+    renderResults();
+    return;
+  }
+
+  // Show loading in results area
+  document.getElementById("resultsList").innerHTML = `
+    <div class="text-center py-12">
+      <svg class="animate-spin w-8 h-8 mx-auto text-brand-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+      <p class="mt-4 text-sm text-gray-500">正在分析最佳方案…</p>
+    </div>`;
+
+  try {
+    const res = await fetch("/api/payment/diagnose", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({answers})
+    });
+    const data = await res.json();
+    if (data.error) {
+      document.getElementById("resultsList").innerHTML = `<p class="text-red-600 text-sm">${data.error}</p>`;
+      return;
+    }
+    diagnosisResults = data.recommendations;
+    renderResults();
+  } catch(e) {
+    document.getElementById("resultsList").innerHTML = `<p class="text-red-600 text-sm">网络错误，请重试</p>`;
+  }
+}
+
+function renderResults() {
+  if (!diagnosisResults) return;
+
+  const DIFF_COLORS = {简单:"text-green-600 bg-green-50",中等:"text-amber-600 bg-amber-50",困难:"text-red-600 bg-red-50"};
+  const DIFF_BADGE = function(d) { return DIFF_COLORS[d] || "text-gray-600 bg-gray-50"; };
+
+  let html = "";
+  diagnosisResults.forEach((r, idx) => {
+    const isRec = r.recommended;
+    html += `
+      <div class="bg-white rounded-xl shadow-sm border-2 ${isRec ? 'border-brand-600 ring-2 ring-brand-100' : 'border-gray-200'} p-6 mb-4">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-bold text-gray-900">${r.name}</h3>
+              ${isRec ? '<span class="px-2 py-0.5 bg-brand-600 text-white text-xs font-bold rounded-full">最推荐</span>' : ''}
+            </div>
+            <p class="text-sm text-gray-500 mt-1">${r.tagline}</p>
+          </div>
+          <div class="text-right shrink-0 ml-4">
+            <span class="text-2xl font-bold ${isRec ? 'text-brand-600' : 'text-gray-400'}">${r.score} 分</span>
+          </div>
+        </div>
+        ${r.reason ? `<div class="bg-brand-50 border border-brand-100 rounded-lg p-3 mb-3 text-sm text-brand-800">💡 ${r.reason}</div>` : ""}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div>
+            <p class="text-xs font-medium text-gray-500 mb-2">优势</p>
+            <ul class="space-y-1">
+              ${r.features.map(f => `<li class="flex items-start gap-2 text-sm text-gray-700"><span class="text-green-500 shrink-0">✓</span> ${f}</li>`).join("")}
+            </ul>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-gray-500 mb-2">注意</p>
+            <ul class="space-y-1">
+              ${r.limitations.map(l => `<li class="flex items-start gap-2 text-sm text-gray-500"><span class="text-gray-400 shrink-0">!</span> ${l}</li>`).join("")}
+            </ul>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500 mb-3">
+          <span class="px-2 py-0.5 rounded-full ${DIFF_BADGE(r.difficulty)}">难度：${r.difficulty}</span>
+          <span>⏱ ${r.time}</span>
+        </div>
+        <a href="/payment/tutorial/${r.tutorial_slug}" class="inline-flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 font-medium">
+          查看接入教程
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>`;
+  });
+  document.getElementById("resultsList").innerHTML = html;
+}
+
+function restart() {
+  step = 0;
+  answers = {};
+  diagnosisResults = null;
+  document.getElementById("wizard").style.display = "";
+  document.getElementById("results").classList.add("hidden");
+  renderQuestion();
+}
+
+// Init
+renderQuestion();
+</script>
+</body>
+</html>

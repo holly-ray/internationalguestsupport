@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>意见反馈 - 国际宾客支持</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
+<script src="/static/app.js"></script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+  <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+    <a href="/console" class="flex items-center gap-2 hover:opacity-80">
+      <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">客</div>
+      <span class="font-semibold text-gray-900 text-sm">国际宾客支持</span>
+    </a>
+    <a href="/console" class="text-sm text-gray-500 hover:text-brand-600">← 返回控制台</a>
+  </div>
+</header>
+
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-1">意见反馈</h1>
+    <p class="text-gray-500 text-sm">您的每一条建议都会帮助我们变得更好</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+    <div id="msgBox" class="hidden px-4 py-3 rounded-lg text-sm mb-4"></div>
+
+    <form id="feedbackForm" onsubmit="submitFeedback(event)" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">反馈类型</label>
+        <select id="category" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+          <option value="功能建议">功能建议</option>
+          <option value="Bug 报告">Bug 报告</option>
+          <option value="使用体验">使用体验</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          反馈内容 <span class="text-red-500">*</span>
+        </label>
+        <textarea id="content" rows="5" maxlength="2000" required placeholder="请详细描述您的建议或问题..." class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-y"></textarea>
+        <div class="flex justify-between mt-1">
+          <span class="text-xs text-gray-400">至少 5 个字</span>
+          <span class="text-xs text-gray-400" id="charCount">0 / 2000</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">联系方式（选填）</label>
+        <input id="contact" type="text" maxlength="100" placeholder="手机号或微信 ID，方便我们回复您" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+      </div>
+
+      <button type="submit" id="submitBtn" class="w-full py-3 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors disabled:opacity-50">
+        提交反馈
+      </button>
+    </form>
+  </div>
+
+  <!-- Past feedback -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">我的反馈记录</h2>
+    <div id="pastFeedbacks">
+      <p class="text-sm text-gray-400 text-center py-4">加载中...</p>
+    </div>
+  </div>
+</div>
+
+<footer class="border-t border-gray-200 bg-white mt-12">
+  <div class="max-w-5xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+    <p>我们珍视每一位用户的反馈。您的建议将直接影响产品改进方向。</p>
+  </div>
+</footer>
+
+<script>
+requireAuth();
+
+document.getElementById('content').addEventListener('input', function() {
+  document.getElementById('charCount').textContent = this.value.length + ' / 2000';
+});
+
+function submitFeedback(e) {
+  e.preventDefault();
+  var btn = document.getElementById('submitBtn');
+  var content = document.getElementById('content').value.trim();
+
+  if (content.length < 5) {
+    msg('error', '反馈内容太短，至少 5 个字');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="animate-spin w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
+
+  fetch('/api/beta/feedback', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      category: document.getElementById('category').value,
+      content: content,
+      contact: document.getElementById('contact').value.trim()
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btn.textContent = '提交反馈';
+    if (data.error) {
+      msg('error', data.error);
+    } else {
+      msg('success', data.message);
+      document.getElementById('content').value = '';
+      document.getElementById('contact').value = '';
+      document.getElementById('charCount').textContent = '0 / 2000';
+      loadPastFeedbacks();
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.textContent = '提交反馈';
+    msg('error', '网络错误，请重试');
+  });
+}
+
+function loadPastFeedbacks() {
+  var container = document.getElementById('pastFeedbacks');
+  fetch('/api/beta/feedback')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var feedbacks = data.feedbacks || [];
+      if (feedbacks.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">暂无反馈记录</p>';
+        return;
+      }
+      var html = '<div class="space-y-3">';
+      feedbacks.reverse().forEach(function(f) {
+        var catColors = {
+          '功能建议': 'bg-blue-50 text-blue-700',
+          'Bug 报告': 'bg-red-50 text-red-700',
+          '使用体验': 'bg-green-50 text-green-700',
+        };
+        var catColor = catColors[f.category] || 'bg-gray-100 text-gray-600';
+        html += '<div class="border border-gray-100 rounded-lg p-4">' +
+          '<div class="flex items-center justify-between mb-2">' +
+            '<span class="px-2 py-0.5 rounded-full text-xs font-medium ' + catColor + '">' + escapeHtml(f.category) + '</span>' +
+            '<span class="text-xs text-gray-400">' + escapeHtml(f.timestamp ? f.timestamp.slice(0, 10) : '') + '</span>' +
+          '</div>' +
+          '<p class="text-sm text-gray-700">' + escapeHtml(f.content) + '</p>' +
+          '</div>';
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    })
+    .catch(function() {
+      container.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">加载失败</p>';
+    });
+}
+
+loadPastFeedbacks();
+</script>
+</body>
+</html>

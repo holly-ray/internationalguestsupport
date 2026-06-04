@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MRZ 护照识别工具 - 国际宾客支持</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+  <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+    <a href="/console" class="flex items-center gap-2 hover:opacity-80">
+      <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">客</div>
+      <span class="font-semibold text-gray-900 text-sm">国际宾客支持</span>
+    </a>
+    <a href="/console" class="text-sm text-gray-500 hover:text-brand-600">← 返回控制台</a>
+  </div>
+</header>
+
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900 mb-1">MRZ 护照识别工具</h1>
+    <p class="text-gray-500 text-sm">粘贴护照底部的 MRZ 两行文字，自动提取关键信息</p>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-6">
+    <!-- Left: Input -->
+    <div class="flex-1 space-y-4">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">MRZ 第一行（44 个字符）</label>
+        <textarea id="line1" rows="2" maxlength="44" placeholder="P<CHNEXAMPLE<<NAME<<<<<<<<<<<<<<<<<<<<<<<<<<<" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none"></textarea>
+        <div class="flex justify-between mt-1">
+          <span class="text-xs text-gray-400" id="len1">0 / 44</span>
+          <span class="text-xs text-gray-400">第一行以 P 开头</span>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">MRZ 第二行（44 个字符）</label>
+        <textarea id="line2" rows="2" maxlength="44" placeholder="E12345678<CHN8001010M2501010<<<<<<<<<<<<<<<00" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-y"></textarea>
+        <div class="flex justify-between mt-1">
+          <span class="text-xs text-gray-400" id="len2">0 / 44</span>
+          <span class="text-xs text-gray-400">包含校验位</span>
+        </div>
+      </div>
+
+      <button id="parseBtn" onclick="parseMRZ()" class="w-full py-3 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        解析 MRZ
+      </button>
+
+      <div id="errorBox" class="hidden bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700"></div>
+
+      <div class="text-center">
+        <a href="/psb/passport-guide" class="text-xs text-brand-600 hover:underline">护照 MRZ 在哪里？查看各国护照识别指南 →</a>
+      </div>
+    </div>
+
+    <!-- Right: Results -->
+    <div class="flex-1">
+      <div id="resultCard" class="hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">识别结果</h2>
+
+        <div class="space-y-3">
+          <div class="flex items-center justify-between py-2 border-b border-gray-100">
+            <span class="text-sm text-gray-500">证件类型</span>
+            <span class="text-sm font-medium text-gray-900" id="r_type">-</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-gray-100">
+            <span class="text-sm text-gray-500">签发国</span>
+            <span class="text-sm font-medium text-gray-900" id="r_issuer">-</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-gray-100">
+            <span class="text-sm text-gray-500">英文姓名</span>
+            <span class="text-sm font-medium text-gray-900 font-mono" id="r_name">-</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-gray-100">
+            <span class="text-sm text-gray-500">护照号码</span>
+            <span class="text-sm font-medium text-gray-900 font-mono" id="r_passport">-</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-gray-100">
+            <span class="text-sm text-gray-500">国籍</span>
+            <span class="text-sm font-medium text-gray-900" id="r_nationality">-</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-gray-100">
+            <span class="text-sm text-gray-500">出生日期</span>
+            <span class="text-sm font-medium text-gray-900" id="r_dob">-</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-gray-100">
+            <span class="text-sm text-gray-500">性别</span>
+            <span class="text-sm font-medium text-gray-900" id="r_sex">-</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-gray-100">
+            <span class="text-sm text-gray-500">有效期至</span>
+            <span class="text-sm font-medium text-gray-900" id="r_expiry">-</span>
+          </div>
+        </div>
+
+        <div class="mt-6 flex gap-3">
+          <button onclick="copyResults()" class="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+            复制全部信息
+          </button>
+          <button onclick="clearAll()" class="px-4 py-2.5 border border-gray-300 text-gray-500 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+            清除
+          </button>
+        </div>
+
+        <div id="copyMsg" class="hidden mt-2 text-xs text-center text-green-600">已复制到剪贴板</div>
+      </div>
+
+      <div id="emptyState" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+        <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+        <p class="text-sm text-gray-500">粘贴 MRZ 后点击"解析 MRZ"</p>
+        <p class="text-xs text-gray-400 mt-1">支持标准护照（2×44）和护照卡（2×36）</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="border-t border-gray-200 bg-white mt-12">
+  <div class="max-w-5xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+    <p>MRZ 格式遵循 ICAO 9303 国际标准。本工具不会存储您的护照数据。</p>
+  </div>
+</footer>
+
+<script>
+var currentResult = null;
+
+document.querySelectorAll('textarea').forEach(function(ta) {
+  ta.addEventListener('input', function() {
+    var id = this.id;
+    document.getElementById('len' + id.slice(-1)).textContent = this.value.length + ' / ' + this.maxLength;
+    this.value = this.value.replace(/[^A-Za-z0-9<]/g, '');
+    this.value = this.value.toUpperCase();
+  });
+});
+
+function parseMRZ() {
+  var line1 = document.getElementById('line1').value.trim();
+  var line2 = document.getElementById('line2').value.trim();
+  var btn = document.getElementById('parseBtn');
+  var errBox = document.getElementById('errorBox');
+  var resultCard = document.getElementById('resultCard');
+  var emptyState = document.getElementById('emptyState');
+  var copyMsg = document.getElementById('copyMsg');
+
+  errBox.classList.add('hidden');
+  copyMsg.classList.add('hidden');
+
+  if (!line1 || !line2) {
+    errBox.textContent = '请输入 MRZ 两行内容';
+    errBox.classList.remove('hidden');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="animate-spin w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
+
+  fetch('/api/psb/parse-mrz', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({line1: line1, line2: line2})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btn.textContent = '解析 MRZ';
+
+    if (data.error) {
+      errBox.textContent = data.error;
+      errBox.classList.remove('hidden');
+      resultCard.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      return;
+    }
+
+    currentResult = data.data;
+    document.getElementById('r_type').textContent = data.data.document_type || '-';
+    document.getElementById('r_issuer').textContent = data.data.issuing_state || '-';
+    document.getElementById('r_name').textContent = (data.data.surname + ' ' + data.data.given_name).trim() || '-';
+    document.getElementById('r_passport').textContent = data.data.passport_number || '-';
+    document.getElementById('r_nationality').textContent = data.data.nationality || '-';
+    document.getElementById('r_dob').textContent = data.data.dob || '-';
+    document.getElementById('r_sex').textContent = data.data.sex || '-';
+    document.getElementById('r_expiry').textContent = data.data.expiry || '-';
+
+    resultCard.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+  })
+  .catch(function(err) {
+    btn.disabled = false;
+    btn.textContent = '解析 MRZ';
+    errBox.textContent = '网络错误，请重试';
+    errBox.classList.remove('hidden');
+  });
+}
+
+function copyResults() {
+  if (!currentResult) return;
+  var text = '证件类型: ' + currentResult.document_type + '\n' +
+    '签发国: ' + currentResult.issuing_state + '\n' +
+    '英文姓名: ' + (currentResult.surname + ' ' + currentResult.given_name).trim() + '\n' +
+    '护照号码: ' + currentResult.passport_number + '\n' +
+    '国籍: ' + currentResult.nationality + '\n' +
+    '出生日期: ' + currentResult.dob + '\n' +
+    '性别: ' + currentResult.sex + '\n' +
+    '有效期至: ' + currentResult.expiry;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      var msg = document.getElementById('copyMsg');
+      msg.classList.remove('hidden');
+      setTimeout(function() { msg.classList.add('hidden'); }, 2000);
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    var msg = document.getElementById('copyMsg');
+    msg.classList.remove('hidden');
+    setTimeout(function() { msg.classList.add('hidden'); }, 2000);
+  }
+}
+
+function clearAll() {
+  document.getElementById('line1').value = '';
+  document.getElementById('line2').value = '';
+  document.getElementById('len1').textContent = '0 / 44';
+  document.getElementById('len2').textContent = '0 / 44';
+  document.getElementById('resultCard').classList.add('hidden');
+  document.getElementById('emptyState').classList.remove('hidden');
+  document.getElementById('errorBox').classList.add('hidden');
+  currentResult = null;
+}
+</script>
+</body>
+</html>
