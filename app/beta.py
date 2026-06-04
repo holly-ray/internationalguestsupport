@@ -7,7 +7,7 @@ from urllib.request import Request, urlopen
 from flask import Blueprint, request, jsonify, session, render_template
 
 from app.auth import login_required
-from app.kv_client import redis_get, redis_set, redis_keys, redis_del
+from app.kv_client import redis_get, redis_set, redis_keys, redis_del, is_redis_available
 from app.merchant import SUBSCRIPTION_PLANS
 
 beta_bp = Blueprint("beta", __name__)
