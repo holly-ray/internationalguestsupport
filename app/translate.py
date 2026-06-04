@@ -6,11 +6,10 @@ from urllib.error import URLError
 from flask import Blueprint, request, jsonify, session
 
 from app.rate_limit import rate_limit
+from app.auth import login_required
+from app.constants import HISTORY_MAX_ENTRIES, HISTORY_TTL
 
 translate_bp = Blueprint("translate", __name__)
-
-HISTORY_MAX_ENTRIES = 200
-HISTORY_TTL = 7776000  # 90 days
 
 PROMPTS = {
     "menu": {
@@ -224,9 +223,9 @@ def _check_auth():
     from flask import session
     if "user_id" not in session:
         return jsonify({"error": "请先登录"}), 401
-    from app.auth import check_rate_limit
+    from app.auth import check_rate_limit, _get_user_limit
     if not check_rate_limit(session["user_id"]):
-        limit = os.getenv("DAILY_TRANSLATION_LIMIT", "20")
+        limit = _get_user_limit(session["user_id"])
         return jsonify({"error": f"今日翻译次数已用完（每日限额 {limit} 次）"}), 429
     return None
 
@@ -326,10 +325,9 @@ def translate():
 
 
 @translate_bp.route("/api/export-pdf", methods=["POST"])
+@login_required
+@rate_limit("export")
 def export_pdf():
-    auth_err = _check_auth()
-    if auth_err:
-        return auth_err
     from io import BytesIO
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import getSampleStyleSheet
@@ -379,11 +377,9 @@ def export_pdf():
 
 
 @translate_bp.route("/api/export-image", methods=["POST"])
+@login_required
+@rate_limit("export")
 def export_image():
-    auth_err = _check_auth()
-    if auth_err:
-        return auth_err
-
     try:
         from flask import Response
         from app.image_export import generate_zip_of_cards, generate_card_image
@@ -425,14 +421,11 @@ def export_image():
 
 
 @translate_bp.route("/api/translate/generate-description", methods=["POST"])
+@login_required
 @rate_limit("generate_description", identifier_fn=lambda: session.get("user_id", "anon"))
 def generate_description():
-    from flask import session
     from app.kv_client import redis_get
-    from app.auth import login_required as _login_required
-
-    if "user_id" not in session:
-        return jsonify({"error": "请先登录"}), 401
+    from flask import session
 
     user_id = session["user_id"]
 

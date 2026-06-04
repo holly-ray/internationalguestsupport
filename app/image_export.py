@@ -18,18 +18,21 @@ GRAY_BORDER = "#e5e7eb"
 GRAY_TEXT = "#9ca3af"
 BODY_TEXT = "#374151"
 
-_FONT = None
+_FONT_PATH = None
+_FONT_CACHE = {}
 
 
 def _font(size, bold=False):
-    global _FONT
-    if _FONT is None:
+    global _FONT_PATH
+    if _FONT_PATH is None:
         font_path = os.path.join(os.path.dirname(__file__), "static", "fonts", "NotoSansSC-Regular.ttf")
-        if os.path.exists(font_path):
-            _FONT = font_path
-        else:
-            return ImageFont.load_default()
-    return ImageFont.truetype(_FONT, size)
+        _FONT_PATH = font_path if os.path.exists(font_path) else None
+    if _FONT_PATH is None:
+        return ImageFont.load_default()
+    cache_key = (size, bold)
+    if cache_key not in _FONT_CACHE:
+        _FONT_CACHE[cache_key] = ImageFont.truetype(_FONT_PATH, size)
+    return _FONT_CACHE[cache_key]
 
 
 def _wrap_lines(text, font, max_width):

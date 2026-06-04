@@ -2,6 +2,7 @@ import json
 from flask import Blueprint, request, jsonify, session
 from app.auth import login_required
 from app.kv_client import redis_get, redis_set
+from app.constants import PROFILE_TTL
 
 merchant_bp = Blueprint("merchant", __name__)
 
@@ -106,7 +107,7 @@ def save_profile():
     from datetime import datetime, timezone
 
     profile["updated_at"] = datetime.now(timezone.utc).isoformat()
-    redis_set(f"profile:{user_id}", json.dumps(profile, ensure_ascii=False), ex=7776000)
+    redis_set(f"profile:{user_id}", json.dumps(profile, ensure_ascii=False), ex=PROFILE_TTL)
     return jsonify({"success": True, "profile": profile})
 
 

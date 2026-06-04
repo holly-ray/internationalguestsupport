@@ -67,7 +67,7 @@ def parse_mrz_td3(line1, line2):
             yy = int(raw[:2])
             mm = raw[2:4]
             dd = raw[4:6]
-            century = "19" if yy > 30 else "20"
+            century = "19" if yy >= 70 else "20"
             return f"{century}{raw[:2]}-{mm}-{dd}"
         return raw
 
@@ -111,7 +111,7 @@ def parse_mrz_td2(line1, line2):
             yy = int(raw[:2])
             mm = raw[2:4]
             dd = raw[4:6]
-            century = "19" if yy > 30 else "20"
+            century = "19" if yy >= 70 else "20"
             return f"{century}{raw[:2]}-{mm}-{dd}"
         return raw
 

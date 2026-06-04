@@ -2,7 +2,8 @@ import os
 from flask import Flask
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(".env.local", override=False)
+load_dotenv(".env", override=False)
 
 
 def create_app():

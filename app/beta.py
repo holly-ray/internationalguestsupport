@@ -9,10 +9,9 @@ from flask import Blueprint, request, jsonify, session, render_template
 from app.auth import login_required
 from app.kv_client import redis_get, redis_set, redis_keys, redis_del
 from app.merchant import SUBSCRIPTION_PLANS
+from app.constants import MAX_ERROR_LOG, FEEDBACK_TTL
 
 beta_bp = Blueprint("beta", __name__)
-
-MAX_ERROR_LOG = 100
 
 
 def log_error_to_kv(module, message, details=""):
@@ -135,7 +134,7 @@ def submit_feedback():
     redis_set(
         f"feedback:{user_id}:{int(time.time())}",
         json.dumps(feedback_data, ensure_ascii=False),
-        ex=7776000,
+        ex=FEEDBACK_TTL,
     )
 
     return jsonify({"success": True, "message": "感谢您的反馈！我们会认真查看每一条建议。"})
@@ -175,16 +174,37 @@ def admin_errors():
     return jsonify({"errors": errors, "total": len(errors)})
 
 
-_admin_token = "admin123456"  # 默认密码，登录后建议修改
+_admin_token = None  # Lazy-loaded from env + Redis
+
+
+def _load_admin_token():
+    """Load admin token: env var takes priority, then Redis, then None."""
+    global _admin_token
+    if _admin_token is not None:
+        return _admin_token
+    env_token = os.getenv("ADMIN_TOKEN", "").strip()
+    if env_token:
+        _admin_token = env_token
+        return _admin_token
+    try:
+        stored = redis_get("system:admin_token")
+        if stored and stored.strip():
+            _admin_token = stored.strip()
+            return _admin_token
+    except Exception:
+        pass
+    _admin_token = ""
+    return _admin_token
 
 
 @beta_bp.route("/api/admin/check")
 def admin_check():
-    return jsonify({"token_set": True})
+    token = _load_admin_token()
+    return jsonify({"token_set": bool(token)})
 
 
 def _get_admin_token():
-    return _admin_token
+    return _load_admin_token()
 
 
 def _set_admin_token(val):
@@ -194,17 +214,13 @@ def _set_admin_token(val):
 
 
 def _require_admin():
-    admin_token = _get_admin_token()
-    if admin_token:
-        token = request.headers.get("Authorization", "").replace("Bearer ", "").strip()
-        if token == admin_token:
-            return None
-        return jsonify({"error": "unauthorized"}), 401
-
-    # No token configured — fallback to localhost
-    if request.remote_addr not in ("127.0.0.1", "::1", "localhost"):
-        return jsonify({"error": "unauthorized"}), 401
-    return None
+    admin_token = _load_admin_token()
+    if not admin_token:
+        return jsonify({"error": "ADMIN_TOKEN 未配置，请在环境变量中设置 ADMIN_TOKEN"}), 503
+    token = request.headers.get("Authorization", "").replace("Bearer ", "").strip()
+    if token == admin_token:
+        return None
+    return jsonify({"error": "unauthorized"}), 401
 
 
 @beta_bp.route("/api/admin/setup", methods=["POST"])

@@ -6,17 +6,24 @@ from app.kv_client import redis_incr, redis_get, redis_set
 
 # Default limits
 LIMITS = {
-    "login": {"window": 60, "max": 10},           # 10 login attempts per minute per IP
-    "translate": {"window": 60, "max": 30},         # 30 translate requests per minute per user
-    "generate_description": {"window": 300, "max": 5},  # 5 AI generations per 5 min per user
+    "login": {"window": 60, "max": 10},
+    "translate": {"window": 60, "max": 30},
+    "generate_description": {"window": 300, "max": 5},
+    "export": {"window": 60, "max": 10},
 }
 
 
 def _get_ip():
-    """Best-effort extraction of client IP."""
+    """Extract client IP. On Vercel, trusts X-Real-IP or last hop of X-Forwarded-For."""
+    real_ip = request.headers.get("X-Real-IP", "")
+    if real_ip:
+        return real_ip.strip()
     forwarded = request.headers.get("X-Forwarded-For", "")
     if forwarded:
-        return forwarded.split(",")[0].strip()
+        # Vercel appends the real client IP as the last entry
+        parts = [p.strip() for p in forwarded.split(",")]
+        if parts:
+            return parts[-1]
     return request.remote_addr or "127.0.0.1"
 
 

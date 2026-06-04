@@ -4,8 +4,16 @@ import time
 import threading
 from urllib.request import Request, urlopen
 
-_REST_URL = os.getenv("UPSTASH_REDIS_REST_URL", "").strip().lstrip("﻿")
-_REST_TOKEN = os.getenv("UPSTASH_REDIS_REST_TOKEN", "").strip().lstrip("﻿")
+def _strip_env(val):
+    """Strip whitespace and BOM prefix from environment variable values."""
+    v = val.strip()
+    if v and ord(v[0]) == 0xFEFF:
+        v = v[1:]
+    return v
+
+
+_REST_URL = _strip_env(os.getenv("UPSTASH_REDIS_REST_URL", ""))
+_REST_TOKEN = _strip_env(os.getenv("UPSTASH_REDIS_REST_TOKEN", ""))
 
 _REDIS_OK = None  # None=untested, True=working, False=failed
 _REDIS_LAST_CHECK = 0
@@ -168,10 +176,18 @@ def redis_exists(key):
 
 def redis_keys(pattern):
     if _redis_configured():
-        result = _redis_cmd("KEYS", pattern)
-        if isinstance(result, list):
-            return result
-        return []
+        keys = []
+        cursor = "0"
+        while True:
+            result = _redis_cmd("SCAN", cursor, "MATCH", pattern, "COUNT", "200")
+            if not isinstance(result, list) or len(result) < 2:
+                return []
+            cursor = str(result[0]) if result[0] is not None else "0"
+            batch = result[1] if isinstance(result[1], list) else []
+            keys.extend(batch)
+            if cursor == "0":
+                break
+        return keys
     return _memory_keys(pattern)
 
 
