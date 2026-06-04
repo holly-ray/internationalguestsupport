@@ -294,10 +294,16 @@ def seed_leschan(key):
 
     import json as _json
 
+    import hashlib, secrets
+    def _hash(pw):
+        salt = secrets.token_hex(16)
+        return salt + ":" + hashlib.sha256((salt + pw).encode()).hexdigest()
+    pwhash = _hash("200115")
+
     # Create user
     redis_set("user:leschan", _json.dumps({
         "username": "leschan",
-        "password": "f8a3c2d1e0b9:978b04e5e7e4e3f6c5de28e169f3e25e",
+        "password": pwhash,
         "created_at": "2026-06-05T00:00:00+00:00",
     }))
 
@@ -313,9 +319,10 @@ def seed_leschan(key):
     }, ensure_ascii=False), ex=7776000)
 
     # Also seed leschan_hotel
+    pwhash2 = _hash("200115")
     redis_set("user:leschan_hotel", _json.dumps({
         "username": "leschan_hotel",
-        "password": "f8a3c2d1e0b9:978b04e5e7e4e3f6c5de28e169f3e25e",
+        "password": pwhash2,
         "created_at": "2026-06-05T00:00:00+00:00",
     }))
     redis_set("profile:leschan_hotel", _json.dumps({
@@ -332,5 +339,5 @@ def seed_leschan(key):
         "success": True,
         "message": "Seeded: 大师傅金奖啤酒鱼 + 阳朔安缇雅民宿",
         "accounts": ["leschan (restaurant)", "leschan_hotel (hotel)"],
-        "password": "leschan2024",
+        "password": "200115",
     })
