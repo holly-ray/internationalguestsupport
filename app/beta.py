@@ -356,6 +356,45 @@ def seed_leschan(key):
     })
 
 
+@beta_bp.route("/api/debug/redis-diag")
+def redis_diag():
+    """Diagnose Redis connection issues. Remove after debugging."""
+    import json as _json
+    from app.kv_client import _redis_configured, _redis_cmd, _memory_get, _memory_keys, is_redis_available as _ira
+    import os as _os
+
+    url_set = bool(_os.getenv("UPSTASH_REDIS_REST_URL", "").strip())
+    token_set = bool(_os.getenv("UPSTASH_REDIS_REST_TOKEN", "").strip())
+    configured = _redis_configured()
+
+    # Raw Redis test
+    raw_error = None
+    ping_result = None
+    try:
+        ping_result = _redis_cmd("PING")
+    except Exception as e:
+        raw_error = str(e)[:300]
+
+    # Write a test key directly via REST
+    import time as _time
+    test_key = f"diag:{int(_time.time())}"
+    set_result = _redis_cmd("SET", test_key, "diag_val", "EX", "60")
+    get_result = _redis_cmd("GET", test_key)
+
+    # Check what's in memory
+    mem_keys = _memory_keys("user:*")[:5]
+    mem_keys2 = _memory_keys("profile:*")[:5]
+    mem_keys3 = _memory_keys("diag:*")[:5]
+
+    return jsonify({
+        "env": {"url_set": url_set, "token_set": token_set, "configured": configured},
+        "ping": {"result": ping_result, "raw_error": raw_error},
+        "test_rw": {"set": set_result, "get": get_result, "passed": get_result == "diag_val"},
+        "memory_keys": {"user_keys": mem_keys, "profile_keys": mem_keys2, "diag_keys": mem_keys3},
+        "is_available": _ira(),
+    })
+
+
 @beta_bp.route("/api/debug/profile/<username>")
 def debug_profile(username):
     import json as _json
