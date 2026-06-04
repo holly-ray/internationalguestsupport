@@ -4,8 +4,8 @@ import time
 import threading
 from urllib.request import Request, urlopen
 
-_REST_URL = os.getenv("UPSTASH_REDIS_REST_URL", "")
-_REST_TOKEN = os.getenv("UPSTASH_REDIS_REST_TOKEN", "")
+_REST_URL = os.getenv("UPSTASH_REDIS_REST_URL", "").strip().lstrip("﻿")
+_REST_TOKEN = os.getenv("UPSTASH_REDIS_REST_TOKEN", "").strip().lstrip("﻿")
 
 _REDIS_OK = None  # None=untested, True=working, False=failed
 _REDIS_LAST_CHECK = 0
