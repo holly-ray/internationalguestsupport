@@ -18,7 +18,6 @@ def create_app():
     from app.gmb import gmb_bp
     from app.payment import payment_bp
     from app.psb import psb_bp
-    from app.payjs import payjs_bp
     from app.beta import beta_bp
     from app.guide import guide_bp
 
@@ -28,7 +27,6 @@ def create_app():
     app.register_blueprint(gmb_bp)
     app.register_blueprint(payment_bp)
     app.register_blueprint(psb_bp)
-    app.register_blueprint(payjs_bp)
     app.register_blueprint(beta_bp)
     app.register_blueprint(guide_bp)
 

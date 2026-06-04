@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 <title>出入境管理局联系方式 - 国际宾客支持</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
@@ -38,7 +39,7 @@
       </div>
     </div>
     <div class="flex items-center justify-between mt-3">
-      <span class="text-xs text-gray-400" id="resultCount">共 50 个城市</span>
+      <select id="provinceFilter" onchange="filterProvince()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"><option value="">全部省份</option></select> <span class="text-xs text-gray-400 self-center" id="resultCount">共 50 个城市</span>
       <span class="text-xs text-gray-400">电话可点击拨打（移动端）</span>
     </div>
   </div>
@@ -82,19 +83,29 @@
 <script>
 var currentSort = 'city';
 var currentSearch = '';
+var currentProvince = '';
 var allContacts = [];
 
 function loadContacts() {
   var params = new URLSearchParams();
-  if (currentSearch) params.set('city', currentSearch);
+  if (currentProvince) { params.set('province', currentProvince); }
+  else if (currentSearch) params.set('city', currentSearch);
   params.set('sort', currentSort);
 
   fetch('/api/psb/contacts?' + params.toString())
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
     .then(function(data) {
-      allContacts = data.contacts;
-      document.getElementById('resultCount').textContent = '显示 ' + data.total + ' / ' + data.total_all + ' 个城市';
-      renderContacts(data.contacts);
+      allContacts = data.contacts || [];
+      document.getElementById('resultCount').textContent = '显示 ' + (data.total || 0) + ' / ' + (data.total_all || 0) + ' 个城市';
+      renderContacts(allContacts);
+    })
+    .catch(function(err) {
+      console.error('PSB contacts load error:', err);
+      document.getElementById('resultCount').textContent = '加载失败，请刷新页面重试';
+      renderContacts([]);
     });
 }
 
@@ -174,7 +185,29 @@ document.getElementById('searchInput').addEventListener('input', function() {
   }, 200);
 });
 
+function filterProvince() {
+  currentProvince = document.getElementById('provinceFilter').value;
+  currentSearch = '';
+  document.getElementById('searchInput').value = '';
+  loadContacts();
+}
+
+function loadProvinces() {
+  fetch('/api/psb/provinces')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var sel = document.getElementById('provinceFilter');
+      (data.provinces || []).forEach(function(p) {
+        var opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        sel.appendChild(opt);
+      });
+    });
+}
+
 // Initial load
+loadProvinces();
 loadContacts();
 </script>
 </body>

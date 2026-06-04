@@ -188,3 +188,9 @@ def api_psb_contacts():
         results = sorted(results, key=lambda c: c.get(sort_by, ""))
 
     return jsonify({"contacts": results, "total": len(results), "total_all": len(CONTACTS)})
+
+
+@psb_bp.route("/api/psb/provinces", methods=["GET"])
+def api_psb_provinces():
+    provinces = sorted(set(c["province"] for c in CONTACTS))
+    return jsonify({"provinces": provinces})

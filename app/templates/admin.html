@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<title>管理后台 - 国际宾客支持</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+  <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+    <a href="/console" class="flex items-center gap-2 hover:opacity-80">
+      <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">客</div>
+      <span class="font-semibold text-gray-900 text-sm">管理后台</span>
+    </a>
+    <a href="/console" class="text-sm text-gray-500 hover:text-brand-600">← 返回控制台</a>
+  </div>
+</header>
+
+<div class="max-w-4xl mx-auto px-4 py-8">
+
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-1">用户套餐管理</h1>
+    <p class="text-sm text-gray-500">手动升级用户套餐，30 天有效期</p>
+  </div>
+
+  <!-- Setup (first time) -->
+  <div id="setupPanel" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-6 mb-6">
+    <h2 class="text-lg font-semibold text-amber-800 mb-2">首次设置管理员密码</h2>
+    <p class="text-sm text-amber-700 mb-4">这是首次使用，请设置一个管理员登录密码。设置后请务必保存好。</p>
+    <div class="flex gap-3">
+      <input id="setupToken" type="password" placeholder="设置管理员密码（至少8位）" minlength="8" class="flex-1 px-3 py-2.5 border border-amber-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+      <button onclick="doSetup()" class="px-4 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700">设置密码</button>
+    </div>
+    <p id="setupStatus" class="text-xs text-amber-600 mt-2 hidden"></p>
+  </div>
+
+  <!-- Auth -->
+  <div id="authPanel" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 hidden">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">管理员认证</h2>
+    <div class="flex gap-3">
+      <input id="adminToken" type="password" placeholder="输入管理员密码" class="flex-1 px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+      <button onclick="setToken()" class="px-4 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700">登录</button>
+    </div>
+    <p id="authStatus" class="text-xs text-gray-400 mt-2 hidden"></p>
+  </div>
+
+  <!-- Error -->
+  <div id="errorPanel" class="hidden bg-red-50 border border-red-200 rounded-xl p-6 mb-6 text-center">
+    <p class="text-sm text-red-700" id="errorMsg"></p>
+  </div>
+
+  <!-- Users -->
+  <div id="mainPanel" class="hidden">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">User ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">当前套餐</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+            </tr>
+          </thead>
+          <tbody id="userList" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="text-center text-xs text-gray-400">
+      <span id="userCount">共 0 个用户</span>
+      <button onclick="loadUsers()" class="ml-3 text-brand-600 hover:underline">刷新</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var token = localStorage.getItem("admin_token") || "";
+
+function headers() {
+  return token ? {"Authorization": "Bearer " + token} : {};
+}
+
+async function checkStatus() {
+  try {
+    var res = await fetch("/api/admin/check");
+    var data = await res.json();
+    if (data.token_set) {
+      document.getElementById("setupPanel").classList.add("hidden");
+      document.getElementById("authPanel").classList.remove("hidden");
+      if (token) loadUsers();
+    } else {
+      document.getElementById("setupPanel").classList.remove("hidden");
+      document.getElementById("authPanel").classList.add("hidden");
+    }
+  } catch(e) {}
+}
+
+async function doSetup() {
+  var newToken = document.getElementById("setupToken").value.trim();
+  if (newToken.length < 8) {
+    document.getElementById("setupStatus").textContent = "密码至少需要 8 位";
+    document.getElementById("setupStatus").classList.remove("hidden");
+    return;
+  }
+  try {
+    var res = await fetch("/api/admin/setup", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({token: newToken})
+    });
+    var data = await res.json();
+    if (data.success) {
+      token = newToken;
+      localStorage.setItem("admin_token", token);
+      document.getElementById("setupStatus").textContent = "密码已设置！";
+      document.getElementById("setupStatus").classList.remove("hidden");
+      setTimeout(function() {
+        document.getElementById("setupPanel").classList.add("hidden");
+        document.getElementById("authPanel").classList.remove("hidden");
+        loadUsers();
+      }, 500);
+    } else {
+      document.getElementById("setupStatus").textContent = data.error || "设置失败";
+      document.getElementById("setupStatus").classList.remove("hidden");
+    }
+  } catch(e) {
+    document.getElementById("setupStatus").textContent = "网络错误";
+    document.getElementById("setupStatus").classList.remove("hidden");
+  }
+}
+
+function setToken() {
+  token = document.getElementById("adminToken").value.trim();
+  if (!token) return;
+  localStorage.setItem("admin_token", token);
+  loadUsers();
+}
+
+async function apiCall(url, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign(opts.headers || {}, headers());
+  var res = await fetch(url, opts);
+  if (res.status === 401) {
+    document.getElementById("errorPanel").classList.remove("hidden");
+    document.getElementById("errorMsg").textContent = "密码错误，请重试";
+    document.getElementById("mainPanel").classList.add("hidden");
+    document.getElementById("authPanel").classList.remove("hidden");
+    return null;
+  }
+  if (!res.ok) {
+    var data = await res.json();
+    alert(data.error || "请求失败");
+    return null;
+  }
+  document.getElementById("errorPanel").classList.add("hidden");
+  return res.json();
+}
+
+async function loadUsers() {
+  if (!token) return;
+  var data = await apiCall("/api/admin/users");
+  if (!data) return;
+  document.getElementById("authPanel").classList.add("hidden");
+  document.getElementById("mainPanel").classList.remove("hidden");
+  document.getElementById("userCount").textContent = "共 " + data.total + " 个用户";
+
+  var rows = "";
+  (data.users || []).forEach(function(u) {
+    var planLabel = {free:"免费版",pro:"专业版",business:"企业版"}[u.plan] || u.plan;
+    rows += '<tr>' +
+      '<td class="px-4 py-3 font-mono text-xs text-gray-700">' + esc(u.user_id) + '</td>' +
+      '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (u.plan === "free" ? "bg-gray-100 text-gray-600" : "bg-green-100 text-green-700") + '">' + planLabel + '</span></td>' +
+      '<td class="px-4 py-3">' +
+        '<select id="plan_' + u.user_id + '" class="px-2 py-1 border border-gray-300 rounded text-xs mr-2">' +
+          '<option value="free">免费版</option>' +
+          '<option value="pro">专业版 ¥29</option>' +
+          '<option value="business">企业版 ¥99</option>' +
+        '</select>' +
+        '<button onclick="upgradeUser(\'' + u.user_id + '\')" class="px-3 py-1 bg-brand-600 text-white rounded text-xs font-medium hover:bg-brand-700">升级</button>' +
+      '</td>' +
+      '</tr>';
+  });
+  document.getElementById("userList").innerHTML = rows || '<tr><td colspan="3" class="px-4 py-8 text-center text-gray-400">暂无用户</td></tr>';
+}
+
+async function upgradeUser(userId) {
+  var sel = document.getElementById("plan_" + userId);
+  var plan = sel.value;
+  if (!confirm("确认将 " + userId + " 升级为 " + plan + " ？")) return;
+  const data = await apiCall("/api/admin/upgrade", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({user_id: userId, plan: plan})
+  });
+  if (data) {
+    alert("已升级 " + userId + " 为 " + plan);
+    loadUsers();
+  }
+}
+
+function esc(s) {
+  if (!s) return "";
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// Init: check status, then auto-load
+checkStatus();
+if (token) {
+  document.getElementById("adminToken").value = token;
+}
+</script>
+</body>
+</html>

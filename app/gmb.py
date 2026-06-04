@@ -153,8 +153,8 @@ def gmb_status_page():
 @gmb_bp.route("/gmb/connect")
 @login_required
 def gmb_connect():
-    if not GMB_CLIENT_ID:
-        return jsonify({"error": "GMB_CLIENT_ID 未配置"}), 500
+    if not GMB_CLIENT_ID or not GMB_CLIENT_SECRET:
+        return render_template("gmb_status.html", error="Google OAuth 尚未配置，请使用手动上架指南。")
 
     state = os.urandom(16).hex()
     redis_set(f"oauth_state:{state}", session["user_id"], ex=600)
@@ -267,6 +267,14 @@ def gmb_callback():
 @gmb_bp.route("/gmb/form")
 def gmb_form_page():
     return render_template("gmb_form.html")
+
+
+@gmb_bp.route("/api/gmb/config", methods=["GET"])
+def gmb_config():
+    """Report whether GMB OAuth is configured."""
+    return jsonify({
+        "oauth_configured": bool(GMB_CLIENT_ID and GMB_CLIENT_SECRET and GMB_REDIRECT_URI),
+    })
 
 
 @gmb_bp.route("/api/gmb/status", methods=["GET"])

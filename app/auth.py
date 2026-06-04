@@ -8,6 +8,7 @@ from functools import wraps
 from flask import Blueprint, request, jsonify, session, redirect, render_template
 
 from app.kv_client import redis_get, redis_set, redis_incr
+from app.rate_limit import rate_limit
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -102,6 +103,7 @@ def register():
 
 
 @auth_bp.route("/api/auth/login", methods=["POST"])
+@rate_limit("login")
 def login_api():
     data = request.get_json()
     username = (data.get("username", "") or "").strip().lower()

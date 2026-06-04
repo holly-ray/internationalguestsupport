@@ -3,9 +3,14 @@ import sys
 import json
 from urllib.request import Request, urlopen
 from urllib.error import URLError
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
+
+from app.rate_limit import rate_limit
 
 translate_bp = Blueprint("translate", __name__)
+
+HISTORY_MAX_ENTRIES = 200
+HISTORY_TTL = 7776000  # 90 days
 
 PROMPTS = {
     "menu": {
@@ -227,6 +232,7 @@ def _check_auth():
 
 
 @translate_bp.route("/api/translate", methods=["POST"])
+@rate_limit("translate", identifier_fn=lambda: session.get("user_id", "anon"))
 def translate():
     try:
         auth_err = _check_auth()
@@ -295,7 +301,7 @@ def translate():
                 except (json.JSONDecodeError, TypeError):
                     history = []
                 history.append(entry)
-                redis_set(f"history:{user_id}", json.dumps(history[-50:], ensure_ascii=False))
+                redis_set(f"history:{user_id}", json.dumps(history[-HISTORY_MAX_ENTRIES:], ensure_ascii=False), ex=HISTORY_TTL)
                 redis_incr(f"total:{user_id}")
         except Exception:
             pass
@@ -419,6 +425,7 @@ def export_image():
 
 
 @translate_bp.route("/api/translate/generate-description", methods=["POST"])
+@rate_limit("generate_description", identifier_fn=lambda: session.get("user_id", "anon"))
 def generate_description():
     from flask import session
     from app.kv_client import redis_get

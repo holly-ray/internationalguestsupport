@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 <title>TripAdvisor 上架指南 - 国际宾客支持</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
@@ -283,10 +284,15 @@ async function generateDescription() {
   }
 }
 
+function showProfileFallback() {
+  var prefill = document.getElementById("step3Prefill");
+  prefill.innerHTML = '<p class="text-xs text-gray-400">暂无门店信息，请先在控制台填写</p>';
+}
+
 async function loadProfile() {
   try {
     const res = await fetch("/api/merchant/profile");
-    if (!res.ok) return;
+    if (!res.ok) { showProfileFallback(); return; }
     const data = await res.json();
     const prefill = document.getElementById("step3Prefill");
     if (data.store_name) {
@@ -303,7 +309,7 @@ async function loadProfile() {
       `<div><span class="text-xs text-gray-500">${f.label}：</span><code class="text-sm cursor-pointer select-all" onclick="copyText(this)">${f.value.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></div>`
     ).join("");
     if (!prefill.innerHTML) prefill.innerHTML = '<p class="text-xs text-gray-400">暂无门店信息，请先在控制台填写</p>';
-  } catch(e) {}
+  } catch(e) { showProfileFallback(); }
 }
 
 loadProgress();

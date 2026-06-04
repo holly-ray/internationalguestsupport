@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 <title>商户控制台 - 国际宾客支持</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
@@ -89,9 +90,9 @@
       <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
       订阅状态
     </a>
-    <a href="/subscription" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
-      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-      升级套餐
+    <a href="/beta/feedback" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      联系客服
     </a>
     <a href="/beta/feedback" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-colors">
       <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
@@ -168,7 +169,7 @@
     <!-- ===== HISTORY PANEL ===== -->
     <div id="panel-history" class="panel-content hidden">
       <h2 class="text-xl font-bold text-gray-900 mb-6">翻译记录</h2>
-      <div id="historyList"></div>
+      <div class="mb-4"><input id="historySearch" type="text" placeholder="搜索翻译记录…" oninput="filterHistory()" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"></div><div id="historyList"></div>
       <p id="historyEmpty" class="text-center text-gray-400 text-sm py-12 hidden">暂无翻译记录。<a href="/dashboard" class="text-brand-600 hover:underline">开始翻译</a></p>
     </div>
 
@@ -189,7 +190,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
           <p class="text-sm text-gray-500 mb-1">当前套餐</p>
           <p class="text-3xl font-bold text-brand-600" id="statPlan">免费版</p>
-          <p class="text-xs text-gray-400 mt-1">4 语种支持</p>
+          <p class="text-xs text-gray-400 mt-1" id="statPlanDesc">4 语种支持</p>
         </div>
       </div>
       <!-- Usage bar -->
@@ -300,42 +301,75 @@ async function saveProfile(e) {
 }
 
 // ===== History =====
+let _historyCache = [];
+
+function filterHistory() {
+  const q = (document.getElementById("historySearch").value || "").trim().toLowerCase();
+  renderHistory(_historyCache, q);
+}
+
+function renderHistory(data, query) {
+  const list = document.getElementById("historyList");
+  const empty = document.getElementById("historyEmpty");
+  const filtered = query ? data.filter(r =>
+    (r.source_preview || "").toLowerCase().includes(query) ||
+    (r.translated_preview || "").toLowerCase().includes(query) ||
+    (r.material_type || "").toLowerCase().includes(query) ||
+    (r.target_lang || "").toLowerCase().includes(query)
+  ) : data;
+
+  if (!data || data.length === 0) {
+    list.innerHTML = "";
+    empty.classList.remove("hidden");
+    return;
+  }
+  if (filtered.length === 0) {
+    list.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">无匹配记录</p>';
+    empty.classList.add("hidden");
+    return;
+  }
+  empty.classList.add("hidden");
+  const TYPE_LABELS = {menu:"菜单/菜品",checkin_guide:"入住指南",room_card:"房型介绍",reg_card:"登记提示卡",emergency_card:"紧急联系卡"};
+  const LANG_FLAGS = {en:"🇬🇧",ja:"🇯🇵",ko:"🇰🇷",ru:"🇷🇺"};
+  list.innerHTML = filtered.slice().reverse().map(r =>
+    `<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-3">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-medium text-brand-700">${TYPE_LABELS[r.material_type] || r.material_type} → ${LANG_FLAGS[r.target_lang] || ""} ${r.target_lang.toUpperCase()}</span>
+        <span class="text-xs text-gray-400">${new Date(r.timestamp).toLocaleString("zh-CN")}</span>
+      </div>
+      <div class="text-xs text-gray-500">
+        <p class="text-gray-400 mb-1">原文：${escapeHtml(r.source_preview)}${r.source_preview && r.source_preview.length >= 80 ? "…" : ""}</p>
+        <p>译文：${escapeHtml(r.translated_preview)}${r.translated_preview && r.translated_preview.length >= 80 ? "…" : ""}</p>
+      </div>
+    </div>`
+  ).join("");
+}
+
 async function loadHistory() {
   try {
     const res = await fetch("/api/merchant/history");
     if (res.status === 401) { if (!_authRedirecting) { _authRedirecting = true; window.location.href = "/login"; } return; }
     const data = await res.json();
-    const list = document.getElementById("historyList");
-    const empty = document.getElementById("historyEmpty");
-    if (!data || data.length === 0) {
-      list.innerHTML = "";
-      empty.classList.remove("hidden");
-      return;
-    }
-    empty.classList.add("hidden");
-    const TYPE_LABELS = {menu:"菜单/菜品",checkin_guide:"入住指南",room_card:"房型介绍",reg_card:"登记提示卡",emergency_card:"紧急联系卡"};
-    const LANG_FLAGS = {en:"🇬🇧",ja:"🇯🇵",ko:"🇰🇷",ru:"🇷🇺"};
-    list.innerHTML = data.slice().reverse().map(r => `
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-3">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-brand-700">${TYPE_LABELS[r.material_type] || r.material_type} → ${LANG_FLAGS[r.target_lang] || ""} ${r.target_lang.toUpperCase()}</span>
-          <span class="text-xs text-gray-400">${new Date(r.timestamp).toLocaleString("zh-CN")}</span>
-        </div>
-        <div class="text-xs text-gray-500">
-          <p class="text-gray-400 mb-1">原文：${escapeHtml(r.source_preview)}${r.source_preview && r.source_preview.length >= 80 ? "…" : ""}</p>
-          <p>译文：${escapeHtml(r.translated_preview)}${r.translated_preview && r.translated_preview.length >= 80 ? "…" : ""}</p>
-        </div>
-      </div>
-    `).join("");
+    _historyCache = Array.isArray(data) ? data : [];
+    renderHistory(_historyCache, "");
   } catch(e) {}
 }
 
 // ===== Stats =====
+const PLAN_DESC = {
+  free: "4 语种支持",
+  pro: "8 语种支持",
+  business: "12 语种支持",
+};
+
 async function loadStats() {
   try {
-    const res = await fetch("/api/merchant/stats");
-    if (res.status === 401) { if (!_authRedirecting) { _authRedirecting = true; window.location.href = "/login"; } return; }
-    const data = await res.json();
+    const [statsRes, subRes] = await Promise.all([
+      fetch("/api/merchant/stats"),
+      fetch("/api/merchant/subscription"),
+    ]);
+    if (statsRes.status === 401) { if (!_authRedirecting) { _authRedirecting = true; window.location.href = "/login"; } return; }
+    const data = await statsRes.json();
     document.getElementById("statToday").textContent = data.today;
     document.getElementById("statTotal").textContent = data.total_all_time;
     document.getElementById("statLimit").textContent = data.limit;
@@ -345,6 +379,12 @@ async function loadStats() {
     document.getElementById("usageBar").style.width = pct + "%";
     if (pct > 80) document.getElementById("usageBar").classList.replace("bg-brand-600", "bg-red-500");
     else document.getElementById("usageBar").classList.replace("bg-red-500", "bg-brand-600");
+
+    if (subRes.ok) {
+      const sub = await subRes.json();
+      document.getElementById("statPlan").textContent = sub.name || "免费版";
+      document.getElementById("statPlanDesc").textContent = PLAN_DESC[sub.plan] || PLAN_DESC.free;
+    }
   } catch(e) {}
 }
 
@@ -375,9 +415,9 @@ async function loadSubscription() {
           </ul>
         </div>
         <div class="border-t border-gray-100 pt-4 mt-4">
-          <a href="/subscription" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">
-            升级套餐
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+          <a href="/beta/feedback" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">
+            联系客服升级
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
           </a>
         </div>
       </div>

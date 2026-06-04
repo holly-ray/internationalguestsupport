@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 <title>Google 商家手动上架指南 - 国际宾客支持</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}}</script>
@@ -248,11 +249,11 @@ async function loadProfile() {
       document.getElementById("prefillName").textContent = data.store_name;
       document.getElementById("step2Prefill").classList.remove("hidden");
       const codes = document.querySelectorAll("#step3Prefill code");
-      if (codes[0]) codes[0].textContent = data.store_name || "—";
+      if (codes[0]) codes[0].textContent = data.store_name;
       if (codes[2]) codes[2].textContent = [data.address, data.city].filter(Boolean).join(" ") || "—";
       if (codes[3]) codes[3].textContent = data.phone || "—";
     }
-  } catch(e) {}
+  } catch(e) { /* profile not available, showing defaults */ }
 }
 
 loadProgress();

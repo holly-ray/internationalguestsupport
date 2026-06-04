@@ -1,16 +1,95 @@
 import os
 import json
 import time
+import threading
 from urllib.request import Request, urlopen
-from flask import session as flask_session
 
 _REST_URL = os.getenv("UPSTASH_REDIS_REST_URL", "")
 _REST_TOKEN = os.getenv("UPSTASH_REDIS_REST_TOKEN", "")
 
-_SESSION_KEY = "_kv"
 _REDIS_OK = False
 _REDIS_LAST_CHECK = 0
-_REDIS_RETRY_INTERVAL = 30  # retry Redis ping after 30s on failure
+_REDIS_RETRY_INTERVAL = 30
+
+# In-memory fallback store with TTL — persists across requests within a Fluid instance
+_MEMORY_STORE = {}
+_MEMORY_MAX_ENTRIES = 5000
+_MEMORY_LOCK = threading.Lock()
+
+
+def _memory_prune():
+    """Remove expired entries from the memory store."""
+    now = time.time()
+    expired = [
+        k for k, v in _MEMORY_STORE.items()
+        if v.get("exp") and v["exp"] < now
+    ]
+    for k in expired:
+        del _MEMORY_STORE[k]
+
+
+def _memory_get(key):
+    with _MEMORY_LOCK:
+        entry = _MEMORY_STORE.get(key)
+        if entry is None:
+            return None
+        exp = entry.get("exp")
+        if exp and time.time() > exp:
+            del _MEMORY_STORE[key]
+            return None
+        return entry.get("val")
+
+
+def _memory_set(key, value, ex=None):
+    with _MEMORY_LOCK:
+        if len(_MEMORY_STORE) > _MEMORY_MAX_ENTRIES:
+            _memory_prune()
+        entry = {"val": str(value)}
+        if ex:
+            entry["exp"] = time.time() + int(ex)
+        _MEMORY_STORE[key] = entry
+
+
+def _memory_incr(key):
+    with _MEMORY_LOCK:
+        val = _memory_get(key)
+        new_val = (int(val) + 1) if val is not None else 1
+        entry = _MEMORY_STORE.get(key, {})
+        entry["val"] = str(new_val)
+        _MEMORY_STORE[key] = entry
+        return new_val
+
+
+def _memory_del(key):
+    with _MEMORY_LOCK:
+        _MEMORY_STORE.pop(key, None)
+
+
+def _memory_keys(pattern):
+    import re
+    escaped = re.escape(pattern).replace(r"\*", ".*")
+    try:
+        compiled = re.compile("^" + escaped + "$")
+    except Exception:
+        return []
+    with _MEMORY_LOCK:
+        now = time.time()
+        matched = []
+        for key in list(_MEMORY_STORE.keys()):
+            entry = _MEMORY_STORE.get(key)
+            if entry is None:
+                continue
+            exp = entry.get("exp")
+            if exp and now > exp:
+                del _MEMORY_STORE[key]
+                continue
+            if compiled.match(key):
+                matched.append(key)
+        return matched
+
+
+def _memory_exists(key):
+    return 1 if _memory_get(key) is not None else 0
 
 
 def _check_redis():
@@ -20,7 +99,6 @@ def _check_redis():
         return True
     if not _REST_URL or not _REST_TOKEN:
         return False
-    # Don't retry on every call — respect cooldown
     now = time.time()
     if _REDIS_LAST_CHECK and (now - _REDIS_LAST_CHECK) < _REDIS_RETRY_INTERVAL:
         return False
@@ -62,60 +140,16 @@ def _redis_cmd(*args):
         return resp.get("result")
     except Exception:
         global _REDIS_OK
-        _REDIS_OK = False  # force re-check on next call
+        _REDIS_OK = False
         return None
 
 
-def _session_store():
-    """Get or create the session-based KV store."""
-    if _SESSION_KEY not in flask_session:
-        flask_session[_SESSION_KEY] = {}
-    return flask_session[_SESSION_KEY]
-
-
-def _session_get(key):
-    store = _session_store()
-    entry = store.get(key)
-    if entry is None:
-        return None
-    exp = entry.get("exp")
-    if exp and time.time() > exp:
-        del store[key]
-        return None
-    return entry.get("val")
-
-
-def _session_set(key, value, ex=None):
-    store = _session_store()
-    entry = {"val": str(value)}
-    if ex:
-        entry["exp"] = time.time() + int(ex)
-    store[key] = entry
-
-
-def _session_incr(key):
-    val = _session_get(key)
-    if val is None:
-        _session_set(key, "1")
-        return 1
-    new_val = int(val) + 1
-    store = _session_store()
-    if key in store:
-        store[key]["val"] = str(new_val)
-    return new_val
-
-
-def _session_del(key):
-    store = _session_store()
-    store.pop(key, None)
-
-
-# ---- Public API ----
+# ---- Public API — Redis primary, in-memory fallback ----
 
 def redis_get(key):
     if _check_redis():
         return _redis_cmd("GET", key)
-    return _session_get(key)
+    return _memory_get(key)
 
 
 def redis_set(key, value, ex=None):
@@ -123,26 +157,26 @@ def redis_set(key, value, ex=None):
         if ex:
             return _redis_cmd("SET", key, str(value), "EX", str(ex))
         return _redis_cmd("SET", key, str(value))
-    _session_set(key, value, ex)
+    _memory_set(key, value, ex)
     return True
 
 
 def redis_incr(key):
     if _check_redis():
         return _redis_cmd("INCR", key)
-    return _session_incr(key)
+    return _memory_incr(key)
 
 
 def redis_del(key):
     if _check_redis():
         return _redis_cmd("DEL", key)
-    _session_del(key)
+    _memory_del(key)
 
 
 def redis_exists(key):
     if _check_redis():
         return _redis_cmd("EXISTS", key)
-    return 1 if _session_get(key) is not None else 0
+    return _memory_exists(key)
 
 
 def redis_keys(pattern):
@@ -152,25 +186,7 @@ def redis_keys(pattern):
         if isinstance(result, list):
             return result
         return []
-    store = _session_store()
-    import re
-    escaped = re.escape(pattern).replace(r"\*", ".*")
-    try:
-        compiled = re.compile("^" + escaped + "$")
-    except Exception:
-        return []
-    matched = []
-    for key in list(store.keys()):
-        entry = store.get(key)
-        if entry is None:
-            continue
-        exp = entry.get("exp")
-        if exp and time.time() > exp:
-            del store[key]
-            continue
-        if compiled.match(key):
-            matched.append(key)
-    return matched
+    return _memory_keys(pattern)
 
 
 def is_redis_available():

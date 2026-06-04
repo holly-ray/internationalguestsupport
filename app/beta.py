@@ -7,7 +7,8 @@ from urllib.request import Request, urlopen
 from flask import Blueprint, request, jsonify, session, render_template
 
 from app.auth import login_required
-from app.kv_client import redis_get, redis_set, redis_keys
+from app.kv_client import redis_get, redis_set, redis_keys, redis_del
+from app.merchant import SUBSCRIPTION_PLANS
 
 beta_bp = Blueprint("beta", __name__)
 
@@ -161,14 +162,9 @@ def list_feedback():
 
 @beta_bp.route("/api/admin/errors", methods=["GET"])
 def admin_errors():
-    """View error log. Protected by ADMIN_TOKEN env var or localhost."""
-    admin_token = os.getenv("ADMIN_TOKEN", "").strip()
-    if admin_token:
-        token = request.headers.get("Authorization", "").replace("Bearer ", "").strip()
-        if token != admin_token:
-            return jsonify({"error": "unauthorized"}), 401
-    elif request.remote_addr not in ("127.0.0.1", "::1", "localhost"):
-        return jsonify({"error": "unauthorized"}), 401
+    err = _require_admin()
+    if err:
+        return err
 
     try:
         raw = redis_get("system:error_log")
@@ -177,3 +173,114 @@ def admin_errors():
         errors = []
 
     return jsonify({"errors": errors, "total": len(errors)})
+
+
+_admin_token = "admin123456"  # 默认密码，登录后建议修改
+
+
+@beta_bp.route("/api/admin/check")
+def admin_check():
+    return jsonify({"token_set": True})
+
+
+def _get_admin_token():
+    return _admin_token
+
+
+def _set_admin_token(val):
+    global _admin_token
+    _admin_token = val.strip()
+    redis_set("system:admin_token", _admin_token)
+
+
+def _require_admin():
+    admin_token = _get_admin_token()
+    if admin_token:
+        token = request.headers.get("Authorization", "").replace("Bearer ", "").strip()
+        if token == admin_token:
+            return None
+        return jsonify({"error": "unauthorized"}), 401
+
+    # No token configured — fallback to localhost
+    if request.remote_addr not in ("127.0.0.1", "::1", "localhost"):
+        return jsonify({"error": "unauthorized"}), 401
+    return None
+
+
+@beta_bp.route("/api/admin/setup", methods=["POST"])
+def admin_setup():
+    """First-time admin token setup. Open when no token exists yet."""
+    existing = _get_admin_token()
+    if existing:
+        err = _require_admin()
+        if err:
+            return err
+
+    data = request.get_json()
+    if not data or not data.get("token", "").strip():
+        return jsonify({"error": "请提供 token"}), 400
+
+    _set_admin_token(data["token"].strip())
+    return jsonify({"success": True, "message": "Admin token 已设置"})
+
+
+@beta_bp.route("/api/admin/upgrade", methods=["POST"])
+def admin_upgrade():
+    err = _require_admin()
+    if err:
+        return err
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "请求体不能为空"}), 400
+    user_id = data.get("user_id", "").strip()
+    plan_slug = data.get("plan", "").strip()
+
+    if not user_id:
+        return jsonify({"error": "缺少 user_id"}), 400
+    if plan_slug not in SUBSCRIPTION_PLANS:
+        return jsonify({"error": f"无效套餐，可选: {', '.join(SUBSCRIPTION_PLANS.keys())}"}), 400
+
+    from datetime import datetime, timezone, timedelta
+
+    plan = SUBSCRIPTION_PLANS[plan_slug]
+    expires_at = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+
+    sub_data = {
+        "plan": plan_slug,
+        "name": plan.get("name", ""),
+        "features": plan.get("features", []),
+        "translations_per_day": plan.get("translations_per_day", 20),
+        "expires_at": expires_at,
+        "upgraded_by_admin": datetime.now(timezone.utc).isoformat(),
+    }
+
+    redis_set(f"sub:{user_id}", json.dumps(sub_data, ensure_ascii=False))
+    return jsonify({"success": True, "user_id": user_id, "plan": plan_slug, "expires_at": expires_at})
+
+
+@beta_bp.route("/api/admin/users", methods=["GET"])
+def admin_users():
+    err = _require_admin()
+    if err:
+        return err
+
+    sub_keys = redis_keys("sub:*")
+    users = []
+    for key in (sub_keys or []):
+        uid = key.replace("sub:", "")
+        raw = redis_get(key)
+        plan = ""
+        if raw:
+            try:
+                plan = json.loads(raw).get("plan", "")
+            except (json.JSONDecodeError, TypeError):
+                pass
+        users.append({"user_id": uid, "plan": plan or "free"})
+    return jsonify({"users": users, "total": len(users)})
+
+
+@beta_bp.route("/admin")
+def admin_page():
+    from flask import render_template
+    return render_template("admin.html")

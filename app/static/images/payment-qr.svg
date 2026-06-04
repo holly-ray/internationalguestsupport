@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <rect width="300" height="300" fill="#ffffff" rx="12"/>
+  <rect x="10" y="10" width="280" height="280" fill="#f9fafb" stroke="#d1d5db" stroke-width="2" stroke-dasharray="8,4" rx="8"/>
+  <!-- QR code placeholder: simple grid pattern -->
+  <g fill="#9ca3af">
+    <!-- Position detection patterns (corners) -->
+    <rect x="40" y="40" width="8" height="8"/><rect x="56" y="40" width="8" height="8"/><rect x="72" y="40" width="8" height="8"/>
+    <rect x="40" y="56" width="8" height="8"/><rect x="72" y="56" width="8" height="8"/>
+    <rect x="40" y="72" width="8" height="8"/><rect x="56" y="72" width="8" height="8"/><rect x="72" y="72" width="8" height="8"/>
+    <rect x="220" y="40" width="8" height="8"/><rect x="236" y="40" width="8" height="8"/><rect x="252" y="40" width="8" height="8"/>
+    <rect x="220" y="56" width="8" height="8"/><rect x="252" y="56" width="8" height="8"/>
+    <rect x="220" y="72" width="8" height="8"/><rect x="236" y="72" width="8" height="8"/><rect x="252" y="72" width="8" height="8"/>
+    <rect x="40" y="220" width="8" height="8"/><rect x="56" y="220" width="8" height="8"/><rect x="72" y="220" width="8" height="8"/>
+    <rect x="40" y="236" width="8" height="8"/><rect x="72" y="236" width="8" height="8"/>
+    <rect x="40" y="252" width="8" height="8"/><rect x="56" y="252" width="8" height="8"/><rect x="72" y="252" width="8" height="8"/>
+  </g>
+  <!-- Text overlay -->
+  <rect x="60" y="115" width="180" height="70" fill="white" opacity="0.92" rx="6"/>
+  <text x="150" y="142" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#6b7280">请替换为</text>
+  <text x="150" y="162" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#6b7280">您的微信收款码</text>
+  <text x="150" y="210" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#9ca3af">/static/images/payment-qr.svg</text>
+</svg>
