@@ -360,37 +360,61 @@ def seed_leschan(key):
 def redis_diag():
     """Diagnose Redis connection issues. Remove after debugging."""
     import json as _json
-    from app.kv_client import _redis_configured, _redis_cmd, _memory_get, _memory_keys, is_redis_available as _ira
     import os as _os
-
-    url_set = bool(_os.getenv("UPSTASH_REDIS_REST_URL", "").strip())
-    token_set = bool(_os.getenv("UPSTASH_REDIS_REST_TOKEN", "").strip())
-    configured = _redis_configured()
-
-    # Raw Redis test
-    raw_error = None
-    ping_result = None
-    try:
-        ping_result = _redis_cmd("PING")
-    except Exception as e:
-        raw_error = str(e)[:300]
-
-    # Write a test key directly via REST
     import time as _time
+    from urllib.request import Request, urlopen
+
+    rest_url = _os.getenv("UPSTASH_REDIS_REST_URL", "").strip()
+    rest_token = _os.getenv("UPSTASH_REDIS_REST_TOKEN", "").strip()
+
+    # Try raw HTTP call to capture the actual error
+    raw_result = None
+    raw_error = None
+    raw_status = None
+    raw_body = None
+    try:
+        body = _json.dumps(["PING"]).encode("utf-8")
+        req = Request(
+            rest_url,
+            data=body,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {rest_token}",
+            },
+        )
+        with urlopen(req, timeout=10) as r:
+            raw_status = r.status
+            raw_body = r.read().decode("utf-8")[:500]
+            raw_result = _json.loads(raw_body)
+    except Exception as e:
+        raw_error = f"{type(e).__name__}: {str(e)[:400]}"
+
+    # Also test via kv_client's _redis_cmd
+    from app.kv_client import _redis_cmd, _memory_get, _memory_keys, is_redis_available as _ira
+
     test_key = f"diag:{int(_time.time())}"
     set_result = _redis_cmd("SET", test_key, "diag_val", "EX", "60")
     get_result = _redis_cmd("GET", test_key)
-
-    # Check what's in memory
-    mem_keys = _memory_keys("user:*")[:5]
-    mem_keys2 = _memory_keys("profile:*")[:5]
-    mem_keys3 = _memory_keys("diag:*")[:5]
+    ping_via_cmd = _redis_cmd("PING")
 
     return jsonify({
-        "env": {"url_set": url_set, "token_set": token_set, "configured": configured},
-        "ping": {"result": ping_result, "raw_error": raw_error},
-        "test_rw": {"set": set_result, "get": get_result, "passed": get_result == "diag_val"},
-        "memory_keys": {"user_keys": mem_keys, "profile_keys": mem_keys2, "diag_keys": mem_keys3},
+        "env": {
+            "url_set": bool(rest_url),
+            "token_set": bool(rest_token),
+            "url_preview": rest_url[:60] if rest_url else "",
+        },
+        "raw_http": {
+            "status": raw_status,
+            "result": raw_result,
+            "body": raw_body,
+            "error": raw_error,
+        },
+        "kv_cmd": {
+            "ping": ping_via_cmd,
+            "set": set_result,
+            "get": get_result,
+            "passed": get_result == "diag_val",
+        },
         "is_available": _ira(),
     })
 
