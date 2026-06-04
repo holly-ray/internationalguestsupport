@@ -69,9 +69,9 @@
       <img src="/static/images/tripadvisor/step1-register.png" alt="TripAdvisor 注册页面" class="w-full" onerror="this.style.display='none'">
     </div>
     <ol class="space-y-2 text-sm text-gray-700">
-      <li>1. 访问 <a href="https://www.tripadvisor.com/Owners" target="_blank" rel="noopener" class="text-brand-600 hover:underline">tripadvisor.com/Owners</a>（业主中心）</li>
-      <li>2. 点击 "Register" 或 "注册"，使用邮箱创建业主账号</li>
-      <li>3. 验证邮箱后登录业主中心</li>
+      <li>1. 先去 <a href="https://www.tripadvisor.com/Owners" target="_blank" rel="noopener" class="text-brand-600 hover:underline">tripadvisor.com/Owners</a> 搜索你的商家名称+城市，确认是否已被顾客点评创建了页面</li>
+      <li>2. 如果有账号则直接登录；没有则点击 "Register" 用邮箱创建业主账号</li>
+      <li>3. 验证邮箱后登录业主中心。注意：每处物业只能有一个 TripAdvisor 页面，不要创建重复页面</li>
     </ol>
     <div class="mt-4 flex items-center gap-2">
       <input type="checkbox" id="step1Done" onchange="toggleStep(1)" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
@@ -167,11 +167,14 @@
       <img src="/static/images/tripadvisor/step5-verify.png" alt="验证选项" class="w-full" onerror="this.style.display='none'">
     </div>
     <div class="space-y-3 text-sm text-gray-700">
+      <p>TripAdvisor 提供多种验证方式，认领/创建页面后选择其中之一：</p>
       <ul class="space-y-2 ml-4">
+        <li><strong>电话验证（推荐）</strong>：TripAdvisor 致电或发短信到<strong>商家电话</strong>（必须是商家公开电话，非个人手机），提供 4 位验证码。即时完成</li>
+        <li><strong>信用卡验证</strong>：用持卡人姓名与账户一致的信用卡做 $1 预授权（不实际扣款），即时完成</li>
         <li><strong>明信片验证</strong>：邮寄验证码到商家地址，约 2-4 周</li>
-        <li><strong>电话验证</strong>：致电商家电话提供验证码</li>
-        <li><strong>即时验证</strong>：如已验证 Google 商家，部分地区支持快速验证</li>
+        <li><strong>电子邮件/文件验证</strong>：部分情况下需提供营业执照等证明文件</li>
       </ul>
+      <p class="text-xs text-gray-400">新页面提交后，TripAdvisor 编辑团队审核约需<strong>5 个工作日</strong>，通过后邮件通知。信息必须与官网一致。</p>
     </div>
     <div class="mt-4 flex items-center gap-2">
       <input type="checkbox" id="step5Done" onchange="toggleStep(5)" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
