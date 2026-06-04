@@ -360,9 +360,3 @@ def debug_profile(username):
         except Exception:
             result["profile"] = "parse_error"
     return jsonify(result)
-
-
-@beta_bp.route("/admin")
-def admin_page():
-    from flask import render_template
-    return render_template("admin.html")
