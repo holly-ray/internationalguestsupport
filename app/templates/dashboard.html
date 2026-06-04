@@ -429,7 +429,7 @@ async function checkAuth() {
     const res = await fetch("/api/auth/me");
     const data = await res.json();
     if (data.authenticated) {
-      document.getElementById("userInfo").textContent = data.phone + " · 今日 " + (data.usage ? data.usage.today + "/" + data.usage.limit : "—");
+      document.getElementById("userInfo").textContent = data.username + " · 今日 " + (data.usage ? data.usage.today + "/" + data.usage.limit : "—");
       document.getElementById("userInfo").classList.remove("hidden");
       document.getElementById("logoutLink").classList.remove("hidden");
     }

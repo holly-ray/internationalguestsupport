@@ -10,33 +10,33 @@
 <body class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
 
 <div class="w-full max-w-sm">
-  <!-- Logo -->
   <div class="text-center mb-8">
     <div class="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center text-white font-bold mx-auto mb-3">客</div>
     <h1 class="text-xl font-semibold text-gray-900">国际宾客支持</h1>
-    <p class="text-sm text-gray-500 mt-1">登录或注册，开始生成多语种物料</p>
+    <p class="text-sm text-gray-500 mt-1">登录或注册账号</p>
   </div>
 
-  <!-- Form -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
     <div id="errorBox" class="hidden mb-4 p-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-800"></div>
 
+    <!-- Mode tabs -->
+    <div class="flex mb-5 bg-gray-100 rounded-lg p-1">
+      <button id="tabLogin" onclick="switchMode('login')" class="flex-1 py-2 rounded-md text-sm font-medium bg-white shadow transition-all">登录</button>
+      <button id="tabRegister" onclick="switchMode('register')" class="flex-1 py-2 rounded-md text-sm font-medium text-gray-500 transition-all">注册</button>
+    </div>
+
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-1.5">手机号码</label>
-      <input id="phoneInput" type="tel" maxlength="11" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="请输入手机号码" autocomplete="tel">
+      <label class="block text-sm font-medium text-gray-700 mb-1.5">用户名</label>
+      <input id="usernameInput" type="text" maxlength="20" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="3-20位字母或数字" autocomplete="username">
     </div>
 
     <div class="mb-5">
-      <label class="block text-sm font-medium text-gray-700 mb-1.5">验证码</label>
-      <div class="flex gap-2">
-        <input id="codeInput" type="text" maxlength="6" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="验证码" autocomplete="one-time-code">
-        <button id="sendBtn" onclick="sendCode()" class="px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm font-medium text-brand-600 hover:border-brand-400 hover:bg-brand-50 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">发送验证码</button>
-      </div>
+      <label class="block text-sm font-medium text-gray-700 mb-1.5">密码</label>
+      <input id="passwordInput" type="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="至少6位密码" autocomplete="current-password">
+      <p id="registerHint" class="hidden mt-1.5 text-xs text-gray-400">注册后自动登录</p>
     </div>
 
-    <button id="loginBtn" onclick="verifyCode()" class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors disabled:opacity-50">登录 / 注册</button>
-
-    <p id="codeHint" class="hidden mt-4 p-3 text-center text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-lg"></p>
+    <button id="submitBtn" onclick="submitAuth()" class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors disabled:opacity-50">登录</button>
   </div>
 
   <p class="mt-6 text-center text-xs text-gray-400">
@@ -45,8 +45,7 @@
 </div>
 
 <script>
-let countdown = 0;
-let timer = null;
+let mode = "login";
 
 function showError(msg) {
   const box = document.getElementById("errorBox");
@@ -58,96 +57,70 @@ function hideError() {
   document.getElementById("errorBox").classList.add("hidden");
 }
 
-async function sendCode() {
+function switchMode(m) {
+  mode = m;
   hideError();
-  const phone = document.getElementById("phoneInput").value.trim();
-  if (!/^1\d{10}$/.test(phone)) {
-    showError("请输入有效的11位手机号码");
-    return;
-  }
-  if (countdown > 0) return;
-
-  const btn = document.getElementById("sendBtn");
-  btn.disabled = true;
-
-  try {
-    const res = await fetch("/api/auth/send-code", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({phone})
-    });
-    const data = await res.json();
-    if (data.error) {
-      showError(data.error);
-      btn.disabled = false;
-      return;
-    }
-    if (data.code) {
-      const hint = document.getElementById("codeHint");
-      hint.textContent = "验证码：" + data.code;
-      hint.classList.remove("hidden");
-    }
-    countdown = 60;
-    btn.textContent = countdown + "s";
-    timer = setInterval(() => {
-      countdown--;
-      if (countdown <= 0) {
-        clearInterval(timer);
-        btn.textContent = "发送验证码";
-        btn.disabled = false;
-      } else {
-        btn.textContent = countdown + "s";
-      }
-    }, 1000);
-  } catch(e) {
-    showError("网络错误，请重试");
-    btn.disabled = false;
-  }
+  document.getElementById("tabLogin").className = m === "login"
+    ? "flex-1 py-2 rounded-md text-sm font-medium bg-white shadow transition-all"
+    : "flex-1 py-2 rounded-md text-sm font-medium text-gray-500 transition-all";
+  document.getElementById("tabRegister").className = m === "register"
+    ? "flex-1 py-2 rounded-md text-sm font-medium bg-white shadow transition-all"
+    : "flex-1 py-2 rounded-md text-sm font-medium text-gray-500 transition-all";
+  document.getElementById("submitBtn").textContent = m === "login" ? "登录" : "注册";
+  document.getElementById("registerHint").classList.toggle("hidden", m === "login");
 }
 
-async function verifyCode() {
+async function submitAuth() {
   hideError();
-  const phone = document.getElementById("phoneInput").value.trim();
-  const code = document.getElementById("codeInput").value.trim();
+  const username = document.getElementById("usernameInput").value.trim().toLowerCase();
+  const password = document.getElementById("passwordInput").value;
 
-  if (!phone || !code) {
-    showError("请输入手机号和验证码");
+  if (!username || !password) {
+    showError("请输入用户名和密码");
+    return;
+  }
+  if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+    showError("用户名需3-20位字母、数字或下划线");
+    return;
+  }
+  if (password.length < 6) {
+    showError("密码至少6位");
     return;
   }
 
-  const btn = document.getElementById("loginBtn");
+  const btn = document.getElementById("submitBtn");
   btn.disabled = true;
-  btn.textContent = "验证中...";
+  btn.textContent = "请稍候...";
 
+  const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
   try {
-    const res = await fetch("/api/auth/verify-code", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({phone, code})
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
     });
     const data = await res.json();
     if (data.error) {
       showError(data.error);
       btn.disabled = false;
-      btn.textContent = "登录 / 注册";
+      btn.textContent = mode === "login" ? "登录" : "注册";
       return;
     }
     if (data.redirect) {
       window.location.href = data.redirect;
     }
-  } catch(e) {
+  } catch (e) {
     showError("网络错误，请重试");
     btn.disabled = false;
-    btn.textContent = "登录 / 注册";
+    btn.textContent = mode === "login" ? "登录" : "注册";
   }
 }
 
-// Enter key submits
-document.getElementById("codeInput").addEventListener("keydown", function(e) {
-  if (e.key === "Enter") verifyCode();
+document.getElementById("passwordInput").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") submitAuth();
 });
-document.getElementById("phoneInput").addEventListener("keydown", function(e) {
-  if (e.key === "Enter") sendCode();
+document.getElementById("usernameInput").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") document.getElementById("passwordInput").focus();
 });
 </script>
 </body>

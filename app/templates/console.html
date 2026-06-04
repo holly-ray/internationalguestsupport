@@ -394,11 +394,11 @@ async function checkAuth() {
       if (!_authRedirecting) { _authRedirecting = true; window.location.href = "/login"; }
       return;
     }
-    const phone = data.phone || "---";
-    document.getElementById("sidebarPhone").textContent = phone;
-    document.getElementById("headerPhone").textContent = phone;
-    document.getElementById("mobileUser").textContent = phone;
-    document.getElementById("userAvatar").textContent = phone.slice(-2);
+    const username = data.username || "---";
+    document.getElementById("sidebarPhone").textContent = username;
+    document.getElementById("headerPhone").textContent = username;
+    document.getElementById("mobileUser").textContent = username;
+    document.getElementById("userAvatar").textContent = username.slice(0, 2).toUpperCase();
     const usage = data.usage ? data.usage.today + "/" + data.usage.limit : "—";
     document.getElementById("sidebarUsage").textContent = "今日 " + usage;
   } catch(e) {}

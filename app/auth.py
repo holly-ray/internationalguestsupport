@@ -1,27 +1,32 @@
 import os
 import re
 import hashlib
+import secrets
 from datetime import datetime, timezone
 from functools import wraps
 
 from flask import Blueprint, request, jsonify, session, redirect, render_template
 
-from app.kv_client import redis_get, redis_set, redis_incr, redis_del
+from app.kv_client import redis_get, redis_set, redis_incr
 
 auth_bp = Blueprint("auth", __name__)
 
-VERIFICATION_MODE = os.getenv("VERIFICATION_MODE", "demo")
 DAILY_LIMIT = int(os.getenv("DAILY_TRANSLATION_LIMIT", "20"))
 
 
-def _hash_phone(phone):
-    return hashlib.sha256(phone.encode()).hexdigest()[:32]
+def _hash_password(password, salt=None):
+    if salt is None:
+        salt = secrets.token_hex(16)
+    h = hashlib.sha256((salt + password).encode()).hexdigest()
+    return f"{salt}:{h}"
 
 
-def _mask_phone(phone):
-    if len(phone) == 11:
-        return phone[:3] + "****" + phone[-4:]
-    return phone
+def _verify_password(stored, password):
+    try:
+        salt, _ = stored.split(":", 1)
+    except (ValueError, AttributeError):
+        return False
+    return _hash_password(password, salt) == stored
 
 
 def login_required(f):
@@ -43,7 +48,7 @@ def check_rate_limit(user_id):
         if count == 1:
             redis_set(key, "1", ex=86400)
     except Exception:
-        return True  # allow on error (fail-open, but logged)
+        return True
     if isinstance(count, int) and count > DAILY_LIMIT:
         return False
     return True
@@ -60,107 +65,70 @@ def logout():
     return redirect("/")
 
 
-@auth_bp.route("/api/auth/send-code", methods=["POST"])
-def send_code():
+@auth_bp.route("/api/auth/register", methods=["POST"])
+def register():
     data = request.get_json()
-    phone = data.get("phone", "").strip()
-    phone = re.sub(r"[^\d]", "", phone)
-    if phone.startswith("86") and len(phone) == 13:
-        phone = phone[2:]
-    if not re.match(r"^1\d{10}$", phone):
-        return jsonify({"error": "请输入有效的手机号码"}), 400
+    username = (data.get("username", "") or "").strip().lower()
+    password = (data.get("password", "") or "").strip()
 
-    phone_hash = _hash_phone(phone)
+    if not re.match(r"^[a-z0-9_]{3,20}$", username):
+        return jsonify({"error": "用户名需3-20位字母、数字或下划线"}), 400
+    if len(password) < 6:
+        return jsonify({"error": "密码至少6位"}), 400
 
-    # Create user record if new
+    user_key = f"user:{username}"
     try:
-        existing = redis_get(f"user:{phone_hash}")
-        if existing is None:
-            redis_set(
-                f"user:{phone_hash}",
-                f'{{"phone_hash":"{phone_hash}","created_at":"{datetime.now(timezone.utc).isoformat()}"}}',
-            )
-    except Exception as e:
-        try:
-            from app.beta import log_error_to_kv
-            log_error_to_kv("auth.send_code", "KV user record error", str(e))
-        except Exception:
-            pass
+        existing = redis_get(user_key)
+    except Exception:
+        existing = None
 
-    code = "1234" if VERIFICATION_MODE == "demo" else _generate_code()
+    if existing:
+        return jsonify({"error": "该用户名已被注册"}), 409
+
+    import json
     try:
-        redis_set(f"verify:{phone_hash}", code, ex=300)
+        redis_set(user_key, json.dumps({
+            "username": username,
+            "password": _hash_password(password),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }, ensure_ascii=False))
     except Exception as e:
-        try:
-            from app.beta import log_error_to_kv
-            log_error_to_kv("auth.send_code", "KV verify code error", str(e))
-        except Exception:
-            pass
+        return jsonify({"error": "注册失败，请稍后重试"}), 500
 
-    # Always return code to frontend — no SMS integration yet
-    resp = {"success": True, "message": "验证码已发送", "code": code}
-    return jsonify(resp)
+    session["user_id"] = username
+    session["username"] = username
+    return jsonify({"success": True, "redirect": "/console"})
 
 
-MAX_VERIFY_ATTEMPTS = 5
-
-
-@auth_bp.route("/api/auth/verify-code", methods=["POST"])
-def verify_code():
+@auth_bp.route("/api/auth/login", methods=["POST"])
+def login_api():
     data = request.get_json()
-    phone = data.get("phone", "").strip()
-    phone = re.sub(r"[^\d]", "", phone)
-    if phone.startswith("86") and len(phone) == 13:
-        phone = phone[2:]
-    code = data.get("code", "").strip()
+    username = (data.get("username", "") or "").strip().lower()
+    password = (data.get("password", "") or "").strip()
 
-    if not re.match(r"^1\d{10}$", phone):
-        return jsonify({"error": "手机号码格式不正确"}), 400
+    if not username or not password:
+        return jsonify({"error": "请输入用户名和密码"}), 400
 
-    phone_hash = _hash_phone(phone)
-
-    # Brute-force protection: check attempt counter before verifying
-    attempt_key = f"verify_attempts:{phone_hash}"
+    user_key = f"user:{username}"
     try:
-        attempts_raw = redis_get(attempt_key)
-        attempts = int(attempts_raw) if attempts_raw else 0
+        raw = redis_get(user_key)
     except Exception:
-        attempts = 0
+        raw = None
 
-    if attempts >= MAX_VERIFY_ATTEMPTS:
-        return jsonify({"error": "验证码尝试次数过多，请5分钟后重试"}), 429
+    if not raw:
+        return jsonify({"error": "用户名或密码错误"}), 400
 
+    import json
     try:
-        stored = redis_get(f"verify:{phone_hash}")
-    except Exception as e:
-        try:
-            from app.beta import log_error_to_kv
-            log_error_to_kv("auth.verify_code", "KV get verify code error", str(e))
-        except Exception:
-            pass
-        stored = None
+        user = json.loads(raw)
+    except (json.JSONDecodeError, TypeError):
+        return jsonify({"error": "账户数据异常，请联系客服"}), 500
 
-    if not stored or stored != code:
-        try:
-            if attempts == 0:
-                redis_set(attempt_key, "1", ex=300)
-            else:
-                redis_incr(attempt_key)
-        except Exception:
-            pass
-        remaining = MAX_VERIFY_ATTEMPTS - (attempts + 1)
-        return jsonify({
-            "error": f"验证码错误或已过期（剩余 {max(0, remaining)} 次尝试）"
-        }), 400
+    if not _verify_password(user.get("password", ""), password):
+        return jsonify({"error": "用户名或密码错误"}), 400
 
-    # Code correct — clean up
-    try:
-        redis_del(f"verify:{phone_hash}")
-        redis_del(attempt_key)
-    except Exception:
-        pass
-    session["user_id"] = phone_hash
-    session["phone"] = _mask_phone(phone)
+    session["user_id"] = username
+    session["username"] = username
     return jsonify({"success": True, "redirect": "/console"})
 
 
@@ -169,19 +137,14 @@ def me():
     if "user_id" not in session:
         return jsonify({"authenticated": False})
 
-    phone_hash = session["user_id"]
+    username = session["user_id"]
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    count = redis_get(f"rate:{phone_hash}:{today}")
+    count = redis_get(f"rate:{username}:{today}")
     return jsonify({
         "authenticated": True,
-        "phone": session.get("phone", ""),
+        "username": session.get("username", username),
         "usage": {
             "today": int(count) if count else 0,
             "limit": DAILY_LIMIT,
         },
     })
-
-
-def _generate_code():
-    import random
-    return str(random.randint(100000, 999999))
