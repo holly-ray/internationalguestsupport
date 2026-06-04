@@ -7,18 +7,17 @@ from urllib.request import Request, urlopen
 _REST_URL = os.getenv("UPSTASH_REDIS_REST_URL", "")
 _REST_TOKEN = os.getenv("UPSTASH_REDIS_REST_TOKEN", "")
 
-_REDIS_OK = False
+_REDIS_OK = None  # None=untested, True=working, False=failed
 _REDIS_LAST_CHECK = 0
-_REDIS_RETRY_INTERVAL = 30
+_REDIS_RETRY_INTERVAL = 5  # shorter retry — was 30s, caused stale reads
 
-# In-memory fallback store with TTL — persists across requests within a Fluid instance
+# In-memory fallback store with TTL
 _MEMORY_STORE = {}
 _MEMORY_MAX_ENTRIES = 5000
 _MEMORY_LOCK = threading.Lock()
 
 
 def _memory_prune():
-    """Remove expired entries from the memory store."""
     now = time.time()
     expired = [
         k for k, v in _MEMORY_STORE.items()
@@ -92,38 +91,14 @@ def _memory_exists(key):
     return 1 if _memory_get(key) is not None else 0
 
 
-def _check_redis():
-    """Test Redis connectivity. Retries periodically on failure."""
-    global _REDIS_OK, _REDIS_LAST_CHECK
-    if _REDIS_OK:
-        return True
-    if not _REST_URL or not _REST_TOKEN:
-        return False
-    now = time.time()
-    if _REDIS_LAST_CHECK and (now - _REDIS_LAST_CHECK) < _REDIS_RETRY_INTERVAL:
-        return False
-    _REDIS_LAST_CHECK = now
-    try:
-        body = json.dumps(["PING"]).encode("utf-8")
-        req = Request(
-            _REST_URL,
-            data=body,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {_REST_TOKEN}",
-            },
-        )
-        with urlopen(req, timeout=5) as r:
-            resp = json.loads(r.read().decode("utf-8"))
-        _REDIS_OK = resp.get("result") == "PONG"
-        return _REDIS_OK
-    except Exception:
-        return False
+def _redis_configured():
+    return bool(_REST_URL and _REST_TOKEN)
 
 
 def _redis_cmd(*args):
-    """Send a raw Redis command via Upstash REST API."""
-    if not _REST_URL or not _REST_TOKEN:
+    """Send a raw Redis command via Upstash REST API. Returns None on failure."""
+    global _REDIS_OK
+    if not _redis_configured():
         return None
     try:
         body = json.dumps(args).encode("utf-8")
@@ -137,9 +112,10 @@ def _redis_cmd(*args):
         )
         with urlopen(req, timeout=5) as r:
             resp = json.loads(r.read().decode("utf-8"))
-        return resp.get("result")
+        result = resp.get("result")
+        _REDIS_OK = True
+        return result
     except Exception:
-        global _REDIS_OK
         _REDIS_OK = False
         return None
 
@@ -147,41 +123,51 @@ def _redis_cmd(*args):
 # ---- Public API — Redis primary, in-memory fallback ----
 
 def redis_get(key):
-    if _check_redis():
-        return _redis_cmd("GET", key)
+    if _redis_configured():
+        result = _redis_cmd("GET", key)
+        if result is not None or _REDIS_OK:
+            return result
     return _memory_get(key)
 
 
 def redis_set(key, value, ex=None):
-    if _check_redis():
+    if _redis_configured():
         if ex:
-            return _redis_cmd("SET", key, str(value), "EX", str(ex))
-        return _redis_cmd("SET", key, str(value))
+            result = _redis_cmd("SET", key, str(value), "EX", str(ex))
+        else:
+            result = _redis_cmd("SET", key, str(value))
+        if result is not None or _REDIS_OK:
+            return result
     _memory_set(key, value, ex)
     return True
 
 
 def redis_incr(key):
-    if _check_redis():
-        return _redis_cmd("INCR", key)
+    if _redis_configured():
+        result = _redis_cmd("INCR", key)
+        if result is not None:
+            return result
     return _memory_incr(key)
 
 
 def redis_del(key):
-    if _check_redis():
-        return _redis_cmd("DEL", key)
+    if _redis_configured():
+        result = _redis_cmd("DEL", key)
+        if result is not None or _REDIS_OK:
+            return
     _memory_del(key)
 
 
 def redis_exists(key):
-    if _check_redis():
-        return _redis_cmd("EXISTS", key)
+    if _redis_configured():
+        result = _redis_cmd("EXISTS", key)
+        if result is not None:
+            return result
     return _memory_exists(key)
 
 
 def redis_keys(pattern):
-    """Return list of keys matching pattern."""
-    if _check_redis():
+    if _redis_configured():
         result = _redis_cmd("KEYS", pattern)
         if isinstance(result, list):
             return result
@@ -190,5 +176,6 @@ def redis_keys(pattern):
 
 
 def is_redis_available():
-    """Check if Redis is actually working. Used by auth to detect degraded mode."""
-    return _check_redis()
+    if _redis_configured():
+        return _redis_cmd("PING") == "PONG"
+    return False
