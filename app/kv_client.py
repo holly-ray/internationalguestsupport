@@ -9,15 +9,22 @@ _REST_TOKEN = os.getenv("UPSTASH_REDIS_REST_TOKEN", "")
 
 _SESSION_KEY = "_kv"
 _REDIS_OK = False
+_REDIS_LAST_CHECK = 0
+_REDIS_RETRY_INTERVAL = 30  # retry Redis ping after 30s on failure
 
 
 def _check_redis():
-    """Test Redis connectivity once. Returns True if Redis is usable."""
-    global _REDIS_OK
+    """Test Redis connectivity. Retries periodically on failure."""
+    global _REDIS_OK, _REDIS_LAST_CHECK
     if _REDIS_OK:
         return True
     if not _REST_URL or not _REST_TOKEN:
         return False
+    # Don't retry on every call — respect cooldown
+    now = time.time()
+    if _REDIS_LAST_CHECK and (now - _REDIS_LAST_CHECK) < _REDIS_RETRY_INTERVAL:
+        return False
+    _REDIS_LAST_CHECK = now
     try:
         body = json.dumps(["PING"]).encode("utf-8")
         req = Request(
@@ -54,6 +61,8 @@ def _redis_cmd(*args):
             resp = json.loads(r.read().decode("utf-8"))
         return resp.get("result")
     except Exception:
+        global _REDIS_OK
+        _REDIS_OK = False  # force re-check on next call
         return None
 
 
@@ -101,7 +110,7 @@ def _session_del(key):
     store.pop(key, None)
 
 
-# ---- Public API (auto-selects Redis or session) ----
+# ---- Public API ----
 
 def redis_get(key):
     if _check_redis():
@@ -137,7 +146,7 @@ def redis_exists(key):
 
 
 def redis_keys(pattern):
-    """Return list of keys matching pattern. Uses KEYS for Redis, iteration for session."""
+    """Return list of keys matching pattern."""
     if _check_redis():
         result = _redis_cmd("KEYS", pattern)
         if isinstance(result, list):
@@ -162,3 +171,8 @@ def redis_keys(pattern):
         if compiled.match(key):
             matched.append(key)
     return matched
+
+
+def is_redis_available():
+    """Check if Redis is actually working. Used by auth to detect degraded mode."""
+    return _check_redis()

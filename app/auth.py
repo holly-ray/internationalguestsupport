@@ -61,7 +61,8 @@ def login_page():
 
 @auth_bp.route("/logout")
 def logout():
-    session.clear()
+    session.pop("user_id", None)
+    session.pop("username", None)
     return redirect("/")
 
 
