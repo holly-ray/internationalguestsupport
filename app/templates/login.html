@@ -36,7 +36,7 @@
 
     <button id="loginBtn" onclick="verifyCode()" class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors disabled:opacity-50">登录 / 注册</button>
 
-    <p id="demoHint" class="mt-4 text-center text-xs text-gray-400">演示模式：验证码为 1234</p>
+    <p id="codeHint" class="hidden mt-4 p-3 text-center text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-lg"></p>
   </div>
 
   <p class="mt-6 text-center text-xs text-gray-400">
@@ -83,8 +83,9 @@ async function sendCode() {
       return;
     }
     if (data.code) {
-      document.getElementById("demoHint").textContent = "演示模式：验证码为 " + data.code;
-      document.getElementById("demoHint").classList.remove("hidden");
+      const hint = document.getElementById("codeHint");
+      hint.textContent = "验证码：" + data.code;
+      hint.classList.remove("hidden");
     }
     countdown = 60;
     btn.textContent = countdown + "s";

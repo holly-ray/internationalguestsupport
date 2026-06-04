@@ -97,10 +97,8 @@ def send_code():
         except Exception:
             pass
 
-    resp = {"success": True, "message": "验证码已发送"}
-    if VERIFICATION_MODE == "demo":
-        resp["code"] = code
-        resp["message"] = "演示模式：验证码为 1234"
+    # Always return code to frontend — no SMS integration yet
+    resp = {"success": True, "message": "验证码已发送", "code": code}
     return jsonify(resp)
 
 
