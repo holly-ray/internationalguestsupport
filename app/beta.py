@@ -284,3 +284,53 @@ def admin_users():
 def admin_page():
     from flask import render_template
     return render_template("admin.html")
+
+
+@beta_bp.route("/api/seed/leschan/<key>")
+def seed_leschan(key):
+    """Temporary: seed merchant data for leschan account. Remove after use."""
+    if key != "seed_2026_yangshuo":
+        return jsonify({"error": "invalid key"}), 403
+
+    import json as _json
+
+    # Create user
+    redis_set("user:leschan", _json.dumps({
+        "username": "leschan",
+        "password": "f8a3c2d1e0b9:978b04e5e7e4e3f6c5de28e169f3e25e",
+        "created_at": "2026-06-05T00:00:00+00:00",
+    }))
+
+    # Create restaurant profile
+    redis_set("profile:leschan", _json.dumps({
+        "store_name": "大师傅金奖啤酒鱼（西街口总店）",
+        "address": "阳朔县阳朔镇西街德业楼1-7号",
+        "city": "桂林市阳朔县",
+        "phone": "0773-8816826",
+        "category": "餐厅",
+        "description": "阳朔老牌啤酒鱼名店，招牌啤酒弄水骨鱼、钢管鸡、田螺酿、竹筒鸡，人均¥119。位于西街核心地段。",
+        "updated_at": "2026-06-05T00:00:00+00:00",
+    }, ensure_ascii=False), ex=7776000)
+
+    # Also seed leschan_hotel
+    redis_set("user:leschan_hotel", _json.dumps({
+        "username": "leschan_hotel",
+        "password": "f8a3c2d1e0b9:978b04e5e7e4e3f6c5de28e169f3e25e",
+        "created_at": "2026-06-05T00:00:00+00:00",
+    }))
+    redis_set("profile:leschan_hotel", _json.dumps({
+        "store_name": "阳朔安缇雅民宿",
+        "address": "阳朔县高田镇凤楼村竹蔸寨村委工农桥段",
+        "city": "桂林市阳朔县",
+        "phone": "+86-19126149225",
+        "category": "酒店",
+        "description": "35间客房，泳池/投影/SPA/山景浴缸房，24h前台，明确接受全球外宾入住。近工农桥，远眺月亮山。",
+        "updated_at": "2026-06-05T00:00:00+00:00",
+    }, ensure_ascii=False), ex=7776000)
+
+    return jsonify({
+        "success": True,
+        "message": "Seeded: 大师傅金奖啤酒鱼 + 阳朔安缇雅民宿",
+        "accounts": ["leschan (restaurant)", "leschan_hotel (hotel)"],
+        "password": "leschan2024",
+    })
