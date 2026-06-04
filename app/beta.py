@@ -341,3 +341,28 @@ def seed_leschan(key):
         "accounts": ["leschan (restaurant)", "leschan_hotel (hotel)"],
         "password": "200115",
     })
+
+
+@beta_bp.route("/api/debug/profile/<username>")
+def debug_profile(username):
+    import json as _json
+    user_raw = redis_get(f"user:{username}")
+    profile_raw = redis_get(f"profile:{username}")
+    result = {
+        "username": username,
+        "user_exists": user_raw is not None,
+        "profile_exists": profile_raw is not None,
+    }
+    if profile_raw:
+        try:
+            p = _json.loads(profile_raw)
+            result["profile"] = {k: p.get(k) for k in ["store_name", "city", "phone", "category"]}
+        except Exception:
+            result["profile"] = "parse_error"
+    return jsonify(result)
+
+
+@beta_bp.route("/admin")
+def admin_page():
+    from flask import render_template
+    return render_template("admin.html")
