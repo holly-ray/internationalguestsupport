@@ -335,11 +335,24 @@ def seed_leschan(key):
         "updated_at": "2026-06-05T00:00:00+00:00",
     }, ensure_ascii=False), ex=7776000)
 
+    # --- DEBUG: direct Redis write test ---
+    import json as _json2
+    test_key = f"seed_test:{int(time.time())}"
+    redis_set(test_key, "hello_seed", ex=120)
+    readback = redis_get(test_key)
+    redis_ok = is_redis_available()
+
     return jsonify({
         "success": True,
         "message": "Seeded: 大师傅金奖啤酒鱼 + 阳朔安缇雅民宿",
         "accounts": ["leschan (restaurant)", "leschan_hotel (hotel)"],
         "password": "200115",
+        "debug": {
+            "test_key": test_key,
+            "test_readback": readback,
+            "test_passed": readback == "hello_seed",
+            "redis_available": redis_ok,
+        },
     })
 
 
